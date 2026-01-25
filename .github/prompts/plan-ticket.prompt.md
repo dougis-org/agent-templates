@@ -11,7 +11,8 @@ If you selected a different chatmode (e.g., `find-next-ticket`, `work-ticket`, o
 2. Return to this prompt
 
 The chatmode provides behavioral guardrails; this prompt provides specific implementation steps.
-
+**Tool Requirements:**
+**Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.** All file operations, code search, and repository interactions must use MCP tools—shell command workarounds are forbidden.
 ---
 
 **Goal:** Produce a concise, unambiguous implementation plan that a separate engineer/agent can execute without further clarification.
@@ -302,9 +303,11 @@ Every AC row filled (no blanks). Tasks reference milestone IDs if applicable.
 
 ```
 git add docs/plan/tickets/{{JIRA_KEY}}-plan.md
-git commit -S -m "chore(plan): {{JIRA_KEY}} add implementation plan"
+git commit -m "chore(plan): {{JIRA_KEY}} add implementation plan"
 git push -u origin <PREFIX>/{{JIRA_KEY}}-short-kebab-summary
 ```
+
+**Note:** Signed commit requirements are managed in `.github/prompts/includes/signed-commits-requirement.md`. Include the `-S` flag per that include file's configuration.
 
 Open PR referencing the plan file; request CODEOWNERS.
 

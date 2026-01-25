@@ -14,6 +14,9 @@ If you selected a different chatmode (e.g., `plan-ticket`, `work-ticket`, or `an
 
 The chatmode provides execution guardrails; this prompt provides specific implementation workflow.
 
+**Tool Requirements:**
+**Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.** All file operations, code search, and repository interactions must use MCP tools—shell command workarounds are forbidden.
+
 ---
 
 Goal: Identify exactly one GitHub issue (number only) that is the next logical item to pick up, prioritizing the critical path, with zero side effects (read-only). If no item is startable, output a concise blocker explanation instead of a number.

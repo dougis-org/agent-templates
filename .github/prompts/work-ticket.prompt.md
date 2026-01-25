@@ -12,6 +12,9 @@ If you selected a different chatmode (e.g., `find-next-ticket`, `plan-ticket`, o
 
 The chatmode provides execution guardrails; this prompt provides specific implementation workflow.
 
+**Tool Requirements:**
+**Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.** All file operations, code search, and repository interactions must use MCP tools—shell command workarounds are forbidden.
+
 ---
 
 **Goal:** Implement the plan produced by `plan-ticket` with TDD, quality gates, and Jira + branch hygiene.
@@ -137,10 +140,9 @@ Failures → fix root cause (never dilute tests).
 6.3 Negative & error path spot checks 
 6.4 Document deviations (justify or request plan update)
 
----
 ## Phase 7: Commit & PR
 7.1 `git add .`
-7.2 `git commit -S -m "feat(<scope>): {{JIRA_KEY}} <concise summary>"` (use `fix|chore|refactor|docs|test` as appropriate)
+7.2 `git commit -m "feat(<scope>): {{JIRA_KEY}} <concise summary>"` (use `fix|chore|refactor|docs|test` as appropriate; include `-S` flag per `.github/prompts/includes/signed-commits-requirement.md` configuration)
 7.3 `git push -u origin <prefix>/{{JIRA_KEY}}-short-kebab-summary`
 7.4 Open PR (template) including: ticket, plan link, summary, risk (plan §6), rollout (plan §9), test evidence, flag usage
 7.5 Request CODEOWNERS & domain reviewers

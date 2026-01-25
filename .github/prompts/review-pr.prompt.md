@@ -7,6 +7,9 @@ description: 'Review a pull request against GitHub issue acceptance criteria wit
 
 Review a pull request against the requirements and acceptance criteria from a GitHub issue or Jira ticket, acting as a senior code reviewer focused on quality, maintainability, and correctness.
 
+**Tool Requirements:**
+**Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.** All file operations, code search, and repository interactions must use MCP tools—shell command workarounds are forbidden.
+
 ## Required Inputs
 
 **Ticket Identifier:** {{TICKET_ID}}

@@ -14,6 +14,9 @@ If you selected a different chatmode (e.g., `find-next-ticket`, `plan-ticket` or
 
 The chatmode provides execution guardrails; this prompt provides specific analysis workflow.
 
+**Tool Requirements:**
+**Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.** All file operations, code search, and repository interactions must use MCP tools—shell command workarounds are forbidden.
+
 ---
 
 The user input to you can be provided directly by the agent or as a command argument - you MUST consider it before proceeding (if not empty).
@@ -32,7 +35,7 @@ Produce a structured analysis report and optional remediation suggestions (do no
 The analysis must be deterministic and repeatable. If the user provides additional context or corrections, incorporate them explicitly.
 If the user requests you to update the plan, only then edit the plan file (only files matching `docs/plan/tickets/*-plan.md` should be edited).
 
-Agent Guidelines: Follow the repository agent guidance in `AGENTS.md`. Any conflict with a MUST rule in `AGENTS.md` (for example: mandatory GPG-signed commits, TDD requirement) is CRITICAL and must be reported (not suppressed).
+Agent Guidelines: Follow the repository agent guidance in `AGENTS.md`. Any conflict with a MUST rule in `AGENTS.md` (for example: TDD requirement, commit signing configured in `.github/prompts/includes/signed-commits-requirement.md`) is CRITICAL and must be reported (not suppressed).
 
 Execution steps:
 
