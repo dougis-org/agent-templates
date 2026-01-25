@@ -4,16 +4,13 @@ description: Execute an approved implementation plan for a GitHub issue.
 
 ## ⚠️ MODE REQUIREMENT
 
-**This prompt requires the `work-ticket` chatmode to be active.**
-
-If you selected a different chatmode (e.g., `find-next-ticket`, `plan-ticket`, or `analyze-ticket`), please:
-1. Switch to `.github/chatmodes/work-ticket.chatmode.md`
-2. Return to this prompt
-
-The chatmode provides execution guardrails; this prompt provides specific implementation workflow.
+Refer to `.github/prompts/includes/mode-enforcement.md` for `work-ticket` mode requirement.
 
 **Tool Requirements:**
-**Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.** All file operations, code search, and repository interactions must use MCP tools—shell command workarounds are forbidden.
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
+
+**Signed Commits Requirement:**
+Refer to `.github/prompts/includes/signed-commits-requirement.md` for signed commit configuration.
 
 ---
 

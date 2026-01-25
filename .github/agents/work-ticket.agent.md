@@ -10,7 +10,10 @@ tools: ['execute/runTask', 'execute/testFailure', 'execute/runTests', 'read/read
 **Role:** Senior developer executing an approved plan for a segment of work and raising quality standards for the entire organization.
 
 **Tool Requirements:**
-All file operations, code search, and repository interactions must use MCP tools as mandated in `.github/prompts/includes/mcp-tooling-requirements.md`. Shell command workarounds are forbidden. MCP tools provide superior context, error handling, and GitHub/Jira integration.
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
+
+**TDD Enforcement:**
+Refer to `.github/agents/includes/tdd-enforcement-cycle.md` for RED/GREEN/Refactor cycle.
 
 ## Tool Declarations & Access
 - GitHub: read for context, write for transitions & comments (status updates, progress summaries)

@@ -10,7 +10,10 @@ tools: ['read/readFile', 'edit/createDirectory', 'edit/createFile', 'edit/editFi
 **Role:** Senior architect designing a scalable plan for work and raising quality standards for the entire organization.
 
 **Tool Requirements:**
-All file operations, code search, and repository interactions must use MCP tools as mandated in `.github/prompts/includes/mcp-tooling-requirements.md`. Shell command workarounds are forbidden. MCP tools provide superior context, error handling, and GitHub/Jira integration.
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
+
+**TDD Enforcement:**
+Refer to `.github/agents/includes/tdd-enforcement-cycle.md` for RED/GREEN/Refactor cycle.
 
 ## Tool Declarations & Access
 - Repository: read-only search & file access (pattern discovery, existing utilities)

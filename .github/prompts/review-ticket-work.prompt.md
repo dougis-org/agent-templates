@@ -8,7 +8,7 @@ description: 'Review local changes against a GitHub issue before pushing to remo
 Review the current local changes against the requirements and acceptance criteria from a GitHub issue or Jira ticket before pushing to remote.
 
 **Tool Requirements:**
-**Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.** All file operations, code search, and repository interactions must use MCP tools—shell command workarounds are forbidden.
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
 
 ## Required Input
 

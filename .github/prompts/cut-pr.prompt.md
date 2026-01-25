@@ -2,10 +2,10 @@
 description: Cut a PR from the current branch to the default branch with automatic PR creation
 ---
 
-**Goal:** Verify all changes are committed and pushed to the current branch, then automatically cut a PR to the repository's default branch with a semantic title and complete description using the repository's PR template (or best practices if no template exists).
-
 **Tool Requirements:**
-**Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.** All file operations, code search, and repository interactions must use MCP tools—shell command workarounds are forbidden.
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
+
+**Goal:** Verify all changes are committed and pushed to the current branch, then automatically cut a PR to the repository's default branch with a semantic title and complete description using the repository's PR template (or best practices if no template exists).
 
 ## Inputs
 Optional:

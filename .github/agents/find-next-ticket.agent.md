@@ -8,7 +8,7 @@ tools: ['read/readFile', 'edit/createDirectory', 'edit/createFile', 'edit/editFi
 **Purpose:** Select the single next executable GitHub issue based on dependency ordering (blocks/blocked-by), priority, and milestone. Read-only mode; no side effects.
 
 **Tool Requirements:**
-All file operations, code search, and repository interactions must use MCP tools as mandated in `.github/prompts/includes/mcp-tooling-requirements.md`. Shell command workarounds are forbidden. MCP tools provide superior context, error handling, and GitHub/Jira integration.
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
 
 ## Tool Declarations & Access
 - GitHub query: read-only search & fetch

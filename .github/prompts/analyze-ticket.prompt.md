@@ -4,18 +4,11 @@ description: Analyze a ticket-level plan file to ensure the plan delivers the re
 
 # analyze-ticket Prompt
 
-## ⚠️ MODE REQUIREMENT
-
-**This prompt requires the `analyze-ticket` chatmode to be active.**
-
-If you selected a different chatmode (e.g., `find-next-ticket`, `plan-ticket` or `work-ticket`), please:
-1. Switch to `.github/chatmodes/analyze-ticket.chatmode.md`
-2. Return to this prompt
-
-The chatmode provides execution guardrails; this prompt provides specific analysis workflow.
+**Mode Requirement:**
+Refer to `.github/prompts/includes/mode-enforcement.md` for `analyze-ticket` mode requirement.
 
 **Tool Requirements:**
-**Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.** All file operations, code search, and repository interactions must use MCP tools—shell command workarounds are forbidden.
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
 
 ---
 

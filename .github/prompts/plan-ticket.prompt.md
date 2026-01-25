@@ -4,15 +4,14 @@ description: Build an execution plan for a GitHub issue using TDD and repo conte
 
 ## ⚠️ MODE ENFORCEMENT
 
-**This prompt requires the `plan-ticket` chatmode to be active.**
+Refer to `.github/prompts/includes/mode-enforcement.md` for `plan-ticket` mode requirement.
 
-If you selected a different chatmode (e.g., `find-next-ticket`, `work-ticket`, or `analyze-ticket`), please:
-1. Switch to `.github/chatmodes/plan-ticket.chatmode.md`
-2. Return to this prompt
-
-The chatmode provides behavioral guardrails; this prompt provides specific implementation steps.
 **Tool Requirements:**
-**Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.** All file operations, code search, and repository interactions must use MCP tools—shell command workarounds are forbidden.
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
+
+**Signed Commits Requirement:**
+Refer to `.github/prompts/includes/signed-commits-requirement.md` for signed commit configuration.
+
 ---
 
 **Goal:** Produce a concise, unambiguous implementation plan that a separate engineer/agent can execute without further clarification.
