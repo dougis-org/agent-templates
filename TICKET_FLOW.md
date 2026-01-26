@@ -17,6 +17,36 @@ find-next-ticket → plan-ticket → analyze-ticket → work-ticket → review-t
 
 ---
 
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Phase 1: Discovery & Selection](#phase-1-discovery--selection)
+   - [Step 1.1: Find Next Ticket](#step-11-find-next-ticket)
+3. [Phase 2: Planning](#phase-2-planning)
+   - [Step 2.1: Plan Ticket](#step-21-plan-ticket)
+   - [Critical: Decomposition Check](#critical-decomposition-check)
+4. [Phase 3: Analysis & Understanding](#phase-3-analysis--understanding)
+   - [Step 3.1: Analyze Ticket](#step-31-analyze-ticket)
+   - [Step 4.1: Work Ticket](#step-41-work-ticket)
+5. [Phase 5: Review & Submission](#phase-5-review--submission)
+   - [Step 5.1: Review Ticket Work](#step-51-review-ticket-work-optional)
+   - [Step 5.2: Cut PR](#step-52-cut-pr)
+   - [Step 6.1: Review Pull Request](#step-61-review-pull-request)
+6. [Complete Workflow Diagram](#complete-workflow-diagram)
+7. [Scenario-Based Flows](#scenario-based-flows)
+   - [Scenario A: Happy Path](#scenario-a-happy-path-start-to-finish)
+   - [Scenario B: Decomposition Recommended](#scenario-b-decomposition-recommended)
+   - [Scenario C: Blocking Dependencies](#scenario-c-blocking-dependencies)
+   - [Scenario D: Plan Revisions](#scenario-d-plan-revisions)
+   - [Scenario E: Quality Gate Failure](#scenario-e-quality-gate-failure)
+   - [Scenario F: Multiple Sub-Issues](#scenario-f-multiple-sub-issues)
+8. [Tips & Best Practices](#tips--best-practices)
+9. [Common Issues & Resolutions](#common-issues--resolutions)
+10. [Integration with CI/CD](#integration-with-cicd)
+11. [Summary](#summary)
+
+---
+
 ## Phase 1: Discovery & Selection
 
 ### Step 1.1: Find Next Ticket
