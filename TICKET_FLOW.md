@@ -420,44 +420,79 @@ Review Report (Markdown):
 
 ```mermaid
 graph TD
-    A["🔍 START: Find Next Ticket<br/>(find-next-ticket agent)"] --> B{Executable<br/>issue found?}
-    B -->|No| C["⚠️ Blocker Explanation<br/>List blocked issues & dependencies"]
-    C --> A
-    B -->|Yes| D["📋 Plan Ticket<br/>(plan-ticket agent)<br/>Create/update plan file"]
+    subgraph Phase1["Phase 1: Discovery & Selection"]
+        A["🔍 START: Find Next Ticket<br/>(find-next-ticket agent)"]
+        B{Executable<br/>issue found?}
+        C["⚠️ Blocker Explanation<br/>List blocked issues & dependencies"]
+        A --> B
+        B -->|No| C
+        C --> A
+    end
     
-    D --> E["🔍 Check Decomposition<br/>Should this be split?"]
-    E -->|Yes - Recommend Split| F["📊 Decomposition Table<br/>Propose slices<br/>Wait for user approval"]
-    F --> G{User approves<br/>split?}
-    G -->|Yes| H["➕ Create Sub-issues<br/>Create blocked-by relationships<br/>Work sub-issues separately"]
-    G -->|No| I["📝 Continue as Single Ticket<br/>Update plan with decision"]
-    E -->|No - Keep as Single| I
+    subgraph Phase2["Phase 2: Planning"]
+        D["📋 Plan Ticket<br/>(plan-ticket agent)<br/>Create/update plan file"]
+        E["🔍 Check Decomposition<br/>Should this be split?"]
+        F["📊 Decomposition Table<br/>Propose slices<br/>Wait for user approval"]
+        G{User approves<br/>split?}
+        H["➕ Create Sub-issues<br/>Create blocked-by relationships<br/>Work sub-issues separately"]
+        I["📝 Continue as Single Ticket<br/>Update plan with decision"]
+        D --> E
+        E -->|Yes - Recommend Split| F
+        F --> G
+        G -->|Yes| H
+        G -->|No| I
+        E -->|No - Keep as Single| I
+        H --> I
+    end
     
-    I --> J["✅ Analyze Ticket<br/>(analyze-ticket prompt)<br/>Validate plan completeness"]
+    subgraph Phase3["Phase 3: Analysis & Understanding"]
+        J["✅ Analyze Ticket<br/>(analyze-ticket prompt)<br/>Validate plan completeness"]
+        K{Plan valid?}
+        L["🔧 Request Updates<br/>Go back to plan-ticket"]
+        M["⚠️ Acknowledge Issues<br/>Proceed with caution"]
+        J --> K
+        K -->|CRITICAL issues| L
+        K -->|Gaps/warnings| M
+        K -->|All good| M
+    end
     
-    J --> K{Plan valid?}
-    K -->|CRITICAL issues| L["🔧 Request Updates<br/>Go back to plan-ticket"]
-    L --> D
-    K -->|Gaps/warnings| M["⚠️ Acknowledge Issues<br/>Proceed with caution"]
-    K -->|All good| M
+    subgraph Phase4["Phase 4: Implementation (TDD)"]
+        N["💻 Work Ticket<br/>(work-ticket agent)<br/>RED → GREEN → REFACTOR"]
+        O{All tests<br/>& quality gates<br/>pass?}
+        P["🔧 Fix Issues<br/>Return to implementation"]
+        N --> O
+        O -->|No| P
+        P --> N
+    end
     
-    M --> N["💻 Work Ticket<br/>(work-ticket agent)<br/>RED → GREEN → REFACTOR"]
+    subgraph Phase5["Phase 5: Review & Submission"]
+        Q["👀 Review Local Changes<br/>(review-ticket-work)<br/>Optional: Self-review"]
+        R["🎯 Cut PR<br/>(cut-pr)<br/>Create GitHub pull request"]
+        S{Pre-flight<br/>checks pass?}
+        T["⚠️ Fix Issues<br/>Commit, push, rebase as needed"]
+        Q --> R
+        R --> S
+        S -->|No| T
+        T --> R
+    end
     
-    N --> O{All tests<br/>& quality gates<br/>pass?}
-    O -->|No| P["🔧 Fix Issues<br/>Return to implementation"]
-    P --> N
-    O -->|Yes| Q["👀 Review Local Changes<br/>(review-ticket-work prompt)<br/>Optional: Self-review"]
+    subgraph Phase6["Phase 6: Code Review & Merge"]
+        U["📝 Review PR<br/>(review-pr)<br/>Code quality review"]
+        V{Approve?}
+        W["🔧 Update Code<br/>Return to implementation"]
+        X["✅ DONE<br/>Merge PR<br/>Close ticket"]
+        U --> V
+        V -->|Request Changes| W
+        V -->|Approve| X
+    end
     
-    Q --> R["🎯 Cut PR<br/>(cut-pr prompt)<br/>Create GitHub pull request"]
-    
-    R --> S{Pre-flight<br/>checks pass?}
-    S -->|No| T["⚠️ Fix Issues<br/>Commit, push, rebase as needed"]
-    T --> R
-    S -->|Yes| U["📝 Review PR<br/>(review-pr prompt)<br/>Code quality review"]
-    
-    U --> V{Approve?}
-    V -->|Request Changes| W["🔧 Update Code<br/>Return to implementation"]
+    B -->|Yes| D
+    I --> J
+    M --> N
+    O -->|Yes| Q
+    S -->|Yes| U
     W --> N
-    V -->|Approve| X["✅ DONE<br/>Merge PR<br/>Close ticket"]
+    L --> D
     
     style A fill:#4CAF50,color:#fff
     style X fill:#4CAF50,color:#fff
@@ -466,6 +501,12 @@ graph TD
     style P fill:#FF5252,color:#fff
     style T fill:#FF5252,color:#fff
     style W fill:#FF5252,color:#fff
+    style Phase1 fill:#e8f5e9
+    style Phase2 fill:#e3f2fd
+    style Phase3 fill:#f3e5f5
+    style Phase4 fill:#fff3e0
+    style Phase5 fill:#fce4ec
+    style Phase6 fill:#e0f2f1
 ```
 
 ---
