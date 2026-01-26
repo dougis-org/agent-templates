@@ -449,7 +449,7 @@ Review Report (Markdown):
 ## Complete Workflow Diagram
 
 ```mermaid
-graph TD
+graph LR
     subgraph Phase1["Phase 1: Discovery & Selection"]
         A["🔍 START: Find Next Ticket<br/>(find-next-ticket agent)"]
         B{Executable<br/>issue found?}
