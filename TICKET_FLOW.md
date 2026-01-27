@@ -449,78 +449,87 @@ Review Report (Markdown):
 ## Complete Workflow Diagram
 
 ```mermaid
-graph LR
+graph TD
     subgraph Phase1["Phase 1: Discovery & Selection"]
-        A["🔍 START: Find Next Ticket<br/>(find-next-ticket agent)"]
-        B{Executable<br/>issue found?}
-        C["⚠️ Blocker Explanation<br/>List blocked issues & dependencies"]
+        direction LR
+        A["🔍 START<br/>Find Next Ticket"]
+        B{Executable<br/>found?}
+        C["⚠️ Blocker<br/>Explanation"]
         A --> B
+        B -->|Yes| B1["→ Next Phase"]
         B -->|No| C
-        C --> A
+        C --> C1["↻ Retry"]
     end
     
     subgraph Phase2["Phase 2: Planning"]
-        D["📋 Plan Ticket<br/>(plan-ticket agent)<br/>Create/update plan file"]
-        E["🔍 Check Decomposition<br/>Should this be split?"]
-        F["📊 Decomposition Table<br/>Propose slices<br/>Wait for user approval"]
+        direction LR
+        D["📋 Plan Ticket<br/>Create plan file"]
+        E["🔍 Decomposition<br/>Check?"]
+        F["📊 Decomposition<br/>Table"]
         G{User approves<br/>split?}
-        H["➕ Create Sub-issues<br/>Create blocked-by relationships<br/>Work sub-issues separately"]
-        I["📝 Continue as Single Ticket<br/>Update plan with decision"]
+        H["➕ Create<br/>Sub-issues"]
+        I["📝 Continue as<br/>Single Ticket"]
         D --> E
-        E -->|Yes - Recommend Split| F
+        E -->|Yes| F
+        E -->|No| I
         F --> G
         G -->|Yes| H
         G -->|No| I
-        E -->|No - Keep as Single| I
         H --> I
     end
     
     subgraph Phase3["Phase 3: Analysis & Understanding"]
-        J["✅ Analyze Ticket<br/>(analyze-ticket prompt)<br/>Validate plan completeness"]
-        K{Plan valid?}
-        L["🔧 Request Updates<br/>Go back to plan-ticket"]
-        M["⚠️ Acknowledge Issues<br/>Proceed with caution"]
+        direction LR
+        J["✅ Analyze Ticket<br/>Validate plan"]
+        K{Plan<br/>valid?}
+        L["🔧 Request<br/>Updates"]
+        M["⚠️ Acknowledge<br/>Issues"]
         J --> K
-        K -->|CRITICAL issues| L
-        K -->|Gaps/warnings| M
-        K -->|All good| M
+        K -->|CRITICAL| L
+        K -->|Gaps| M
+        K -->|Good| M
     end
     
-    subgraph Phase4["Phase 4: Implementation (TDD)"]
-        N["💻 Work Ticket<br/>(work-ticket agent)<br/>RED → GREEN → REFACTOR"]
-        O{All tests<br/>& quality gates<br/>pass?}
-        P["🔧 Fix Issues<br/>Return to implementation"]
+    subgraph Phase4["Phase 4: Implementation TDD"]
+        direction LR
+        N["💻 Work Ticket<br/>RED→GREEN→REFACTOR"]
+        O{Tests &<br/>quality<br/>gates pass?}
+        P["🔧 Fix Issues<br/>& Retry"]
         N --> O
         O -->|No| P
-        P --> N
+        O -->|Yes| O1["→ Next Phase"]
+        P --> P1["↻ Retry"]
     end
     
     subgraph Phase5["Phase 5: Review & Submission"]
-        Q["👀 Review Local Changes<br/>(review-ticket-work)<br/>Optional: Self-review"]
-        R["🎯 Cut PR<br/>(cut-pr)<br/>Create GitHub pull request"]
-        S{Pre-flight<br/>checks pass?}
-        T["⚠️ Fix Issues<br/>Commit, push, rebase as needed"]
+        direction LR
+        Q["👀 Review<br/>Local Changes"]
+        R["🎯 Cut PR<br/>Create PR"]
+        S{Pre-flight<br/>checks<br/>pass?}
+        T["⚠️ Fix Issues<br/>Push & Retry"]
         Q --> R
         R --> S
         S -->|No| T
-        T --> R
+        S -->|Yes| S1["→ Next Phase"]
+        T --> T1["↻ Retry"]
     end
     
     subgraph Phase6["Phase 6: Code Review & Merge"]
-        U["📝 Review PR<br/>(review-pr)<br/>Code quality review"]
+        direction LR
+        U["📝 Review PR<br/>Code review"]
         V{Approve?}
-        W["🔧 Update Code<br/>Return to implementation"]
-        X["✅ DONE<br/>Merge PR<br/>Close ticket"]
+        W["🔧 Update Code<br/>Request Changes"]
+        X["✅ DONE<br/>Merge PR"]
         U --> V
-        V -->|Request Changes| W
+        V -->|Changes| W
         V -->|Approve| X
     end
     
-    B -->|Yes| D
+    B1 --> D
     I --> J
     M --> N
-    O -->|Yes| Q
-    S -->|Yes| U
+    O1 --> Q
+    S1 --> U
     W --> N
     L --> D
     
