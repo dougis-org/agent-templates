@@ -797,7 +797,7 @@ Tickets Created: 8 tickets for Auth Service milestone
 
 [And 6 more tickets...]
 
-Total SP for M1: 50 (aligned with plan)
+Total SP for M1: 40 (aligned with plan)
 Recommended Sprint Structure: 2-week sprints
   Sprint 1: AUTH-01, AUTH-02, AUTH-03
   Sprint 2: AUTH-04, AUTH-05, AUTH-06
