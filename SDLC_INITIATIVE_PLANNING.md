@@ -45,9 +45,13 @@ This guide describes a comprehensive Software Development Lifecycle (SDLC) proce
 |-------|------|-------|-----------------|
 | `initiative-discoverer` | Read-only | Phase 1 | Identify and scope new initiatives |
 | `prd-generator` | Writer | Phase 1 | Create Product Requirements Document |
+| `prd-reviewer` | Analyst | Phase 1 | Review PRD for completeness & gaps |
 | `hld-generator` | Writer | Phase 2 | Generate High-Level Design artifact |
+| `hld-reviewer` | Analyst | Phase 2 | Review HLD for consistency & architectural soundness |
 | `lld-generator` | Writer | Phase 3 | Generate Low-Level Design specifications |
+| `lld-reviewer` | Analyst | Phase 3 | Review LLD for implementation readiness |
 | `implementation-planner` | Writer | Phase 4 | Break down into milestones & deliverables |
+| `implementation-plan-reviewer` | Analyst | Phase 4 | Review implementation plan for feasibility |
 | `milestone-evaluator` | Analyzer | Phase 5 | Assess if milestone needs recursive SDLC |
 | `ticket-generator` | Writer | Phase 6 | Create GitHub Issues/Jira tickets from tickets |
 | `ticket-workflow-executor` | Executor | Ongoing | Executes individual tickets (see [TICKET_FLOW.md](TICKET_FLOW.md)) |
@@ -72,6 +76,19 @@ This guide describes a comprehensive Software Development Lifecycle (SDLC) proce
   - Out-of-scope clarifications
 - **Quality Gate:** All personas covered, success metrics measurable, no ambiguities
 
+**`prd-reviewer`**
+- **Purpose:** Review PRD for completeness, clarity, and absence of gaps
+- **Inputs:** PRD file from `prd-generator`, initiative context
+- **Outputs:** `docs/prd/{{INITIATIVE_ID}}-prd-review.md` with:
+  - Completeness assessment (all sections present)
+  - Clarity review (no ambiguous language)
+  - Gap analysis (missing personas, requirements, constraints)
+  - Risk identification (unclear success metrics, conflicting requirements)
+  - Stakeholder alignment check (all stakeholder needs addressed)
+  - Recommendations for remediation
+- **Quality Gate:** No blocking gaps; PRD approved for HLD phase OR remediation tasks identified with clear owners
+- **Decision Point:** If gaps found → remand to `prd-generator` for updates OR approve with documented assumptions
+
 **`hld-generator`**
 - **Purpose:** Create High-Level Design from requirements
 - **Inputs:** PRD, architecture guidelines, existing systems
@@ -84,6 +101,21 @@ This guide describes a comprehensive Software Development Lifecycle (SDLC) proce
   - Integration points with existing systems
   - High-level API contracts
 - **Quality Gate:** Architecture is defensible, no unknowns remain
+
+**`hld-reviewer`**
+- **Purpose:** Review HLD for architectural soundness and PRD alignment
+- **Inputs:** HLD file from `hld-generator`, PRD, architecture standards
+- **Outputs:** `docs/design/hld/{{INITIATIVE_ID}}-hld-review.md` with:
+  - Architecture consistency check (aligns with org standards)
+  - PRD traceability (all functional requirements mapped to components)
+  - Technology decision validation (trade-offs justified)
+  - Integration feasibility assessment (external system compatibility)
+  - Security & compliance coverage review
+  - Scalability & performance concerns (feasibility of NFRs)
+  - Identified risks & mitigations
+  - Recommendations for design improvements
+- **Quality Gate:** Architecture approved by senior architects OR remediation items identified with clear owners
+- **Decision Point:** If significant issues found → remand to `hld-generator` for revision OR escalate to architecture review board
 
 **`lld-generator`**
 - **Purpose:** Create detailed Low-Level Design specifications
@@ -99,6 +131,23 @@ This guide describes a comprehensive Software Development Lifecycle (SDLC) proce
   - Performance & scalability targets
 - **Quality Gate:** Design is implementation-ready, developers can code from this
 
+**`lld-reviewer`**
+- **Purpose:** Review LLD for implementation readiness and completeness
+- **Inputs:** LLD file from `lld-generator`, HLD, PRD, code standards
+- **Outputs:** `docs/design/lld/{{INITIATIVE_ID}}-lld-review.md` with:
+  - Implementation completeness check (enough detail to code)
+  - Database schema review (normalization, indexes, constraints)
+  - API contract validation (schema completeness, error handling)
+  - Test coverage assessment (all AC covered by test cases)
+  - Error handling verification (all failure modes addressed)
+  - Configuration & feature flag strategy validation
+  - HLD traceability (all components detailed)
+  - Ambiguity check (no unclear specifications)
+  - Missing technical decisions or open questions
+  - Recommendations for specification improvements
+- **Quality Gate:** Design is implementation-ready (developers have no blocking questions) OR remediation items identified
+- **Decision Point:** If significant gaps found → remand to `lld-generator` for completion OR approve with documented assumptions for developers
+
 **`implementation-planner`**
 - **Purpose:** Break LLD into milestones & discrete deliverables
 - **Inputs:** LLD, team capacity, timeline, dependencies
@@ -112,6 +161,22 @@ This guide describes a comprehensive Software Development Lifecycle (SDLC) proce
     - Success metrics
     - Rollout/deployment plan
 - **Quality Gate:** Milestones are independent & parallelizable where possible
+
+**`implementation-plan-reviewer`**
+- **Purpose:** Review implementation plan for feasibility and completeness
+- **Inputs:** Implementation plan from `implementation-planner`, LLD, team capacity, timeline constraints
+- **Outputs:** `docs/plan/{{INITIATIVE_ID}}-implementation-review.md` with:
+  - Feasibility assessment (timeline realistic given team capacity)
+  - LLD coverage check (all components assigned to milestone)
+  - Dependency analysis (critical path identified, circular dependencies checked)
+  - Effort estimation validation (story points reasonable, risks accounted for)
+  - Milestone independence check (can be executed in parallel safely?)
+  - Rollout & deployment plan validation (safe, rollback-able, monitoring clear)
+  - Risk identification (external dependencies, team skill gaps, timeline pressure)
+  - Resource allocation review (team assignments realistic)
+  - Success metrics clarity (all milestones have measurable outcomes)
+- **Quality Gate:** Plan is feasible and ready for execution OR issues identified with remediation owners
+- **Decision Point:** If significant feasibility issues → remand to `implementation-planner` for revision OR escalate for scope/timeline negotiation
 
 **`milestone-evaluator`**
 - **Purpose:** Assess if milestone needs recursive mini-SDLC
@@ -214,6 +279,45 @@ PRD File: docs/prd/INIT-2026-001-prd.md
 - [ ] Stakeholder sign-off obtained
 
 **Next Step:**
+→ **Step 1.3: PRD Review**
+
+### Step 1.3: PRD Review
+**Agent:** `prd-reviewer`  
+**Type:** Analyst  
+**Purpose:** Validate PRD completeness and identify gaps before HLD
+
+**What it does:**
+- Reviews PRD for completeness against standards
+- Identifies ambiguities or conflicting requirements
+- Checks alignment with all stakeholder needs
+- Validates success metrics are measurable
+- Identifies missing personas, use cases, or constraints
+- Assesses clarity and absence of assumptions
+- Documents gaps and recommendations
+
+**Input:**
+```
+PRD File: docs/prd/INIT-2026-001-prd.md
+Stakeholder List: [from initiative summary]
+```
+
+**Output:**
+```
+Review Report: docs/prd/INIT-2026-001-prd-review.md
+  - Completeness Assessment (sections present/missing)
+  - Gap Analysis (missing requirements, personas, constraints)
+  - Clarity Review (ambiguities identified)
+  - Risk Identification (unclear metrics, conflicts)
+  - Recommendations (remediation actions)
+  - Approval Recommendation (proceed or remediate)
+```
+
+**Decision Point:**
+- ✅ **No Blocking Gaps:** Proceed to HLD phase
+- ⚠️ **Minor Gaps:** Document as assumptions, proceed
+- 🔴 **Blocking Gaps:** Remand to `prd-generator` for updates, then re-review
+
+**Next Step:**
 → **Phase 2: Step 2.1 High-Level Design**
 
 ---
@@ -265,6 +369,49 @@ HLD File: docs/design/hld/INIT-2026-001-hld.md
 - [ ] Scalability targets align with NFRs
 - [ ] Deployment strategy defined (phased rollout?)
 - [ ] Architect review & approval obtained
+
+**Next Step:**
+→ **Step 2.2: HLD Review**
+
+### Step 2.2: HLD Review
+**Agent:** `hld-reviewer`  
+**Type:** Analyst  
+**Purpose:** Validate HLD soundness and PRD alignment before LLD
+
+**What it does:**
+- Validates architecture against organizational standards
+- Checks all PRD requirements mapped to components
+- Assesses technology trade-offs and justifications
+- Evaluates integration feasibility with existing systems
+- Reviews security & compliance approach
+- Validates NFR feasibility from architecture
+- Identifies architectural risks & mitigations
+- Confirms design is ready for detailed specification
+
+**Input:**
+```
+HLD File: docs/design/hld/INIT-2026-001-hld.md
+PRD File: docs/prd/INIT-2026-001-prd.md
+Architecture Standards: [from org]
+```
+
+**Output:**
+```
+Review Report: docs/design/hld/INIT-2026-001-hld-review.md
+  - Architecture Consistency (standards alignment)
+  - PRD Traceability (all requirements mapped)
+  - Technology Validation (trade-offs justified)
+  - Integration Feasibility Assessment
+  - Security & Compliance Review
+  - Scalability Feasibility Check
+  - Risk Analysis & Mitigations
+  - Approval Recommendation
+```
+
+**Decision Point:**
+- ✅ **Architecture Approved:** Proceed to LLD phase
+- ⚠️ **Minor Concerns:** Document mitigations, proceed
+- 🔴 **Significant Issues:** Remand to `hld-generator` or escalate to architecture board
 
 **Next Step:**
 → **Phase 3: Step 3.1 Low-Level Design**
@@ -332,6 +479,51 @@ LLD File: docs/design/lld/INIT-2026-001-lld.md
 - [ ] Performance targets are realistic & measurable
 - [ ] Senior engineer review completed
 - [ ] No ambiguities remain for implementation
+
+**Next Step:**
+→ **Step 3.2: LLD Review**
+
+### Step 3.2: LLD Review
+**Agent:** `lld-reviewer`  
+**Type:** Analyst  
+**Purpose:** Validate LLD is implementation-ready before milestone planning
+
+**What it does:**
+- Validates all components have detailed specifications
+- Checks database schema for normalization & completeness
+- Verifies API contracts are complete & unambiguous
+- Assesses test coverage plan covers all AC
+- Reviews error handling & edge cases
+- Confirms feature flag strategy is clear
+- Identifies any ambiguities that would block developers
+- Validates HLD traceability (all components detailed)
+
+**Input:**
+```
+LLD File: docs/design/lld/INIT-2026-001-lld.md
+HLD File: docs/design/hld/INIT-2026-001-hld.md
+PRD File: docs/prd/INIT-2026-001-prd.md
+Code Standards: [from org]
+```
+
+**Output:**
+```
+Review Report: docs/design/lld/INIT-2026-001-lld-review.md
+  - Implementation Readiness Assessment
+  - Component Detail Completeness
+  - Database Schema Validation
+  - API Contract Completeness
+  - Test Coverage Assessment
+  - Error Handling Verification
+  - Ambiguity Detection (if any)
+  - Missing Technical Decisions
+  - Approval Recommendation
+```
+
+**Decision Point:**
+- ✅ **Implementation-Ready:** Proceed to implementation planning
+- ⚠️ **Minor Clarifications Needed:** Document for developers, proceed
+- 🔴 **Blocking Gaps:** Remand to `lld-generator` for completion
 
 **Next Step:**
 → **Phase 4: Step 4.1 Implementation Planning**
@@ -420,6 +612,51 @@ Implementation Plan: docs/plan/INIT-2026-001-implementation.md
 - [ ] Parallel opportunities identified
 - [ ] Team capacity planning completed
 - [ ] Stakeholder alignment obtained
+
+**Next Step:**
+→ **Step 4.2: Implementation Plan Review**
+
+### Step 4.2: Implementation Plan Review
+**Agent:** `implementation-plan-reviewer`  
+**Type:** Analyst  
+**Purpose:** Validate implementation plan feasibility before milestone decomposition
+
+**What it does:**
+- Assesses timeline realism given team capacity
+- Validates all LLD components assigned to milestones
+- Analyzes critical path & dependencies
+- Evaluates effort estimates (SP per milestone reasonable?)
+- Checks milestone independence (parallelizable?)
+- Reviews rollout & deployment plans for safety
+- Identifies risks & external dependencies
+- Confirms success metrics are measurable
+
+**Input:**
+```
+Implementation Plan: docs/plan/INIT-2026-001-implementation.md
+LLD File: docs/design/lld/INIT-2026-001-lld.md
+Team Capacity: [available engineers, skills]
+```
+
+**Output:**
+```
+Review Report: docs/plan/INIT-2026-001-implementation-review.md
+  - Feasibility Assessment (timeline realistic?)
+  - LLD Coverage (all components assigned)
+  - Dependency Analysis (critical path, circular deps)
+  - Effort Validation (estimates reasonable)
+  - Milestone Independence Check
+  - Rollout & Deployment Review
+  - Risk Identification
+  - Resource Allocation Assessment
+  - Success Metrics Clarity
+  - Approval Recommendation
+```
+
+**Decision Point:**
+- ✅ **Plan is Feasible:** Proceed to milestone evaluation
+- ⚠️ **Minor Adjustments Needed:** Document scope/timeline trade-offs, proceed
+- 🔴 **Significant Issues:** Remand to `implementation-planner` or escalate for scope negotiation
 
 **Next Step:**
 → **Phase 5: Step 5.1 Milestone Evaluation**
