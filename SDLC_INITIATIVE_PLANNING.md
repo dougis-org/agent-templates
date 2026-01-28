@@ -819,72 +819,84 @@ Recommended Sprint Structure: 2-week sprints
 
 ## Complete Initiative Workflow
 
+### High-Level Flow Diagram
+
 ```mermaid
 graph TD
-    subgraph Phase1["Phase 1: Requirements & Vision"]
-        direction LR
-        A["🔍 Initiative<br/>Discovered"]
-        A1["📋 PRD<br/>Generated"]
-        A --> A1
-    end
+    Start["🚀 Initiative<br/>Discovery"] --> Disc["discovery-initiator<br/>Scopes initiative"]
     
-    subgraph Phase2["Phase 2: High-Level Design"]
-        direction LR
-        B["🏗️ HLD<br/>Architected"]
-        B1["✅ HLD<br/>Approved"]
-        B --> B1
-    end
+    Disc --> PRDGen["prd-generator<br/>Creates PRD"]
+    PRDGen --> PRDRev["prd-reviewer<br/>Reviews for gaps"]
     
-    subgraph Phase3["Phase 3: Low-Level Design"]
-        direction LR
-        C["📐 LLD<br/>Specified"]
-        C1["✅ LLD<br/>Reviewed"]
-        C --> C1
-    end
+    PRDRev --> PRDDec{PRD<br/>Approved?}
+    PRDDec -->|Gaps Found| PRDGen
+    PRDDec -->|Approved| HLDGen
     
-    subgraph Phase4["Phase 4: Implementation Planning"]
-        direction LR
-        D["📊 Milestones<br/>Planned"]
-        D1["✅ Plan<br/>Approved"]
-        D --> D1
-    end
+    HLDGen["hld-generator<br/>Designs architecture"] --> HLDRev["hld-reviewer<br/>Validates soundness"]
+    HLDRev --> HLDDec{Architecture<br/>Approved?}
+    HLDDec -->|Issues| HLDGen
+    HLDDec -->|Approved| LLDGen
     
-    subgraph Phase5["Phase 5: Milestone Evaluation"]
-        direction LR
-        E["🔬 Complexity<br/>Assessed"]
-        E1{Direct or<br/>Recursive?}
-        E --> E1
-    end
+    LLDGen["lld-generator<br/>Specifies details"] --> LLDRev["lld-reviewer<br/>Validates completeness"]
+    LLDRev --> LLDDec{Ready for<br/>Implementation?}
+    LLDDec -->|Gaps| LLDGen
+    LLDDec -->|Ready| ImplPlan
     
-    subgraph Phase6["Phase 6: Ticket Creation"]
-        direction LR
-        F["🎫 Tickets<br/>Generated"]
-        F1["✅ Tickets<br/>Ready"]
-        F --> F1
-    end
+    ImplPlan["implementation-planner<br/>Breaks into milestones"] --> ImplRev["implementation-plan-reviewer<br/>Validates feasibility"]
+    ImplRev --> ImplDec{Plan<br/>Feasible?}
+    ImplDec -->|Adjust| ImplPlan
+    ImplDec -->|Feasible| MilEval
     
-    subgraph Execution["Execution: Individual Tickets"]
-        direction LR
-        G["🔄 TICKET_FLOW<br/>Executes Each Ticket"]
-    end
+    MilEval["milestone-evaluator<br/>Assesses complexity"] --> MilDec{Complexity<br/>Level?}
     
-    A1 --> B
-    B1 --> C
-    C1 --> D
-    D1 --> E
-    E1 -->|Direct| F
-    E1 -->|Recursive| A
-    F1 --> G
+    MilDec -->|Direct| TicketGen
+    MilDec -->|Recursive| RecursiveSDLC["Apply SDLC to<br/>Sub-Initiative"]
+    RecursiveSDLC --> Start
     
-    style A fill:#4CAF50,color:#fff
-    style A1 fill:#4CAF50,color:#fff
-    style B1 fill:#2196F3,color:#fff
-    style C1 fill:#2196F3,color:#fff
-    style D1 fill:#2196F3,color:#fff
-    style F1 fill:#4CAF50,color:#fff
-    style G fill:#FF9800,color:#fff
-    style E1 fill:#FFC107,color:#000
+    TicketGen["ticket-generator<br/>Creates tickets"] --> TicketReady["Tickets Ready<br/>for Execution"]
+    
+    TicketReady --> Execute["ticket-workflow-executor<br/>Executes via TICKET_FLOW.md"]
+    Execute --> Done["✅ Initiative<br/>Complete"]
+    
+    style Start fill:#4CAF50,color:#fff
+    style Done fill:#4CAF50,color:#fff
+    style PRDGen fill:#E3F2FD,color:#000
+    style PRDRev fill:#BBDEFB,color:#000
+    style HLDGen fill:#E3F2FD,color:#000
+    style HLDRev fill:#BBDEFB,color:#000
+    style LLDGen fill:#E3F2FD,color:#000
+    style LLDRev fill:#BBDEFB,color:#000
+    style ImplPlan fill:#E3F2FD,color:#000
+    style ImplRev fill:#BBDEFB,color:#000
+    style MilEval fill:#FFF9C4,color:#000
+    style MilDec fill:#FFEB3B,color:#000
+    style TicketGen fill:#E3F2FD,color:#000
+    style TicketReady fill:#81C784,color:#fff
+    style Execute fill:#FF9800,color:#fff
+    style RecursiveSDLC fill:#F8BBD0,color:#000
 ```
+
+### Phase Flow Breakdown
+
+| Phase | Agent | Review Agent | Gate | Output |
+|-------|-------|--------------|------|--------|
+| 1 | `prd-generator` | `prd-reviewer` | Requirements clear? | `docs/prd/{{INIT_ID}}-prd.md` |
+| 2 | `hld-generator` | `hld-reviewer` | Architecture sound? | `docs/design/hld/{{INIT_ID}}-hld.md` |
+| 3 | `lld-generator` | `lld-reviewer` | Implementation-ready? | `docs/design/lld/{{INIT_ID}}-lld.md` |
+| 4 | `implementation-planner` | `implementation-plan-reviewer` | Plan feasible? | `docs/plan/{{INIT_ID}}-implementation.md` |
+| 5 | `milestone-evaluator` | - | Direct or recursive? | Recommendation + sub-initiatives (if recursive) |
+| 6 | `ticket-generator` | - | Tickets executable? | GitHub Issues/Jira tickets |
+| Exec | `ticket-workflow-executor` | - | Work complete? | Deployed, tested, closed |
+
+### Key Decision Points
+
+**Phase 1 → 2:** PRD approved with all stakeholder needs documented and no ambiguities  
+**Phase 2 → 3:** Architecture validated by architects; all PRD requirements mapped to components  
+**Phase 3 → 4:** Design is implementation-ready; developers have no blocking questions  
+**Phase 4 → 5:** Implementation plan is feasible; timeline and resource allocation validated  
+**Phase 5 → 6:** Milestone complexity assessed; decide between direct ticket creation or recursive mini-SDLC  
+**Recursive Loop:** High-complexity milestones re-enter as sub-initiatives; start from PRD generation  
+**Phase 6 → Exec:** Tickets generated from milestones; execution follows [TICKET_FLOW.md](TICKET_FLOW.md)
 
 ---
 
