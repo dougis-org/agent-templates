@@ -53,7 +53,7 @@ This guide describes a comprehensive Software Development Lifecycle (SDLC) proce
 | `implementation-planner` | Writer | Phase 4 | Break down into milestones & deliverables |
 | `implementation-plan-reviewer` | Analyst | Phase 4 | Review implementation plan for feasibility |
 | `milestone-evaluator` | Analyzer | Phase 5 | Assess if milestone needs recursive SDLC |
-| `ticket-generator` | Writer | Phase 6 | Create GitHub Issues/Jira tickets from tickets |
+| `ticket-generator` | Writer | Phase 6 | Create GitHub Issues/Jira tickets from milestone specifications |
 | `ticket-workflow-executor` | Executor | Ongoing | Executes individual tickets (see [TICKET_FLOW.md](TICKET_FLOW.md)) |
 
 ### Agent Definitions
@@ -192,7 +192,7 @@ This guide describes a comprehensive Software Development Lifecycle (SDLC) proce
 - **Purpose:** Create granular tickets from milestone specifications
 - **Inputs:** Milestone spec, LLD, acceptance criteria, effort estimates
 - **Outputs:** GitHub Issues or Jira tickets with:
-  - Title following convention: `[{{INITIATIVE_ID}}] {{TITLE}}`
+  - Title following convention: `[{{INITIATIVE_ID}}-{{MILESTONE}}-{{SEQ}}] {{TITLE}}` (e.g., `[INIT-2026-001-AUTH-01] Implement user registration`)
   - Full description with context
   - Linked to parent milestone
   - Story points & priority
@@ -471,7 +471,7 @@ LLD File: docs/design/lld/INIT-2026-001-lld.md
 
 **Quality Gate Checklist:**
 - [ ] API contracts are versioning-aware
-- [ ] Database schema is normalized (NF3+)
+- [ ] Database schema is normalized (3NF+)
 - [ ] Error handling covers all failure modes
 - [ ] Logging includes correlation IDs & context
 - [ ] Feature flags identified for safe rollout
@@ -564,7 +564,7 @@ Implementation Plan: docs/plan/INIT-2026-001-implementation.md
       Objectives: "Users can register, login, logout"
       Components: Auth service, password hashing, session management
       Acceptance Criteria: [AC1, AC2, ...]
-      Estimated SP: 40
+      Estimated SP: 40 (8 tickets × 5 SP avg)
       Dependencies: None (critical path)
       Success Metrics: Latency <100ms, 99.9% uptime
       Rollout: Internal users → Beta → GA
@@ -678,6 +678,8 @@ Review Report: docs/plan/INIT-2026-001-implementation-review.md
 - If recursive: Outlines sub-initiatives
 
 **Complexity Scoring Criteria:**
+
+Each factor is scored as follows: Low (1 point), Medium (2 points), High (3 points). Sum all factor scores to determine total complexity (max 21 points). Thresholds: Low-Complexity (≤ 10 points) → Direct tickets; Medium-Complexity (11-15 points) → Evaluate; High-Complexity (16+ points) → Recursive mini-SDLC.
 
 | Factor | Low | Medium | High |
 |--------|-----|--------|------|
@@ -913,12 +915,12 @@ Initiative: INIT-2026-001 (User Authentication)
 ├── Phase 3: Design Detail
 │   └── LLD: Detailed API specs
 ├── Phase 4: Planning
-│   └── 1 Milestone: M1 Core Auth (50 SP)
+│   └── 1 Milestone: M1 Core Auth (40 SP)
 ├── Phase 5: Evaluation
 │   └── Complexity: MEDIUM
 │   └── Recommendation: DIRECT TICKETS
 └── Phase 6: Tickets
-    ├── AUTH-01 through AUTH-08 (8 tickets, 50 SP)
+    ├── AUTH-01 through AUTH-08 (8 tickets, 40 SP)
     └── Executed via TICKET_FLOW
 ```
 
