@@ -544,7 +544,7 @@ Run tests after implementation to verify all acceptance criteria met.
 - **Plan:** [docs/plan/tickets/3-plan.md](docs/plan/tickets/3-plan.md)
 - **Test Suite:** [.github/prompts/__tests__/sync-agent-templates.test.md](.github/prompts/__tests__/sync-agent-templates.test.md)
 - **Test Data:** [.github/prompts/test-data/sync-scenarios.json](.github/prompts/test-data/sync-scenarios.json)
-- **Related:** [README.md syncing section](../../../README.md#syncing-agent-templates)
+- **Related:** [README.md syncing section](/README.md#syncing-agent-templates)
 
 ---
 
