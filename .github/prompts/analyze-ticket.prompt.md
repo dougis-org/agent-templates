@@ -33,13 +33,8 @@ Agent Guidelines: Follow the repository agent guidance in `AGENTS.md`. Any confl
 Execution steps:
 
 1. Ticket detection & plan validation
-   - **Refer to `.github/prompts/includes/ticket-detection.md` for shared ticket detection logic.**
-   - Apply the auto-detection steps:
-     1. Parse input (numeric → GitHub, alphanumeric → Jira)
-     2. Attempt to fetch from assumed platform
-     3. If failed, try fallback platform
-     4. If both fail, ask user for clarification and corrected ID
-     5. Establish PLATFORM and TICKET_ID context
+    - **Refer to `.github/prompts/includes/ticket-detection.md` for shared ticket detection logic.**
+    - Apply the auto-detection steps in the include and establish PLATFORM + TICKET_ID context.
    - Derive PLAN_PATH = `docs/plan/tickets/{{TICKET_ID}}-plan.md`. 
    - **Plan file must exist and contain all required sections:**
      * Section 1: Summary

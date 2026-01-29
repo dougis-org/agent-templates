@@ -29,12 +29,7 @@ Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MC
 
 **Refer to `.github/prompts/includes/ticket-detection.md` for shared ticket detection logic.**
 
-Apply the auto-detection steps:
-1. Parse input (numeric → GitHub, alphanumeric → Jira)
-2. Attempt to fetch from assumed platform
-3. If failed, try fallback platform
-4. If both fail, ask user for clarification and corrected ID
-5. Establish PLATFORM and TICKET_ID context
+Apply the auto-detection steps in the include and establish PLATFORM + TICKET_ID context.
 
 **Outputs from this step:**
 - `PLATFORM` = "github" | "jira"
@@ -78,17 +73,7 @@ Verify PR hygiene before diving into code:
 ---
 
 ### Step 3: Acceptance Criteria Validation
-
-For each acceptance criterion from the GitHub issue:
-
-1. **Map AC to changes:** Identify which files/diffs address each criterion
-2. **Verify completeness:** Confirm the implementation fully satisfies the criterion
-3. **Check edge cases:** Validate that boundary conditions mentioned in AC are handled
-4. **Document gaps:** Flag any AC that appear unaddressed or partially implemented
-
-**Output format:**
-| AC # | Criterion Summary | Status | Evidence (files/lines) | Notes |
-|------|-------------------|--------|------------------------|-------|
+Follow `.github/prompts/includes/ac-validation-workflow.md` and use the table from `.github/prompts/includes/ac-validation-template.md`.
 
 ---
 
@@ -123,38 +108,12 @@ Review each changed file for quality standards:
 ---
 
 ### Step 5: Duplication Analysis
-
-Examine the PR diff for duplication:
-
-1. **Within the PR:** Repeated patterns across changed files
-2. **Against existing code:** New code that duplicates existing utilities
-3. **Copy-paste indicators:** Similar blocks with minor variations
-
-**For each duplication found:**
-- Severity: Minor / Moderate / Significant
-- Location: File(s) and line ranges
-- Recommendation: Extract utility, use existing, or accept with justification
+Follow the duplication assessment guidance in `.github/prompts/includes/review-quality-core.md`.
 
 ---
 
 ### Step 6: Complexity Assessment
-
-Evaluate complexity of changes:
-
-1. **Method-level metrics:**
-   - Cyclomatic complexity (flag if > 10)
-   - Method length (flag if > 20 lines)
-   - Parameter count (flag if > 4)
-   - Nesting depth (flag if > 3 levels)
-
-2. **Class-level metrics:**
-   - Number of dependencies (flag if > 5)
-   - Cohesion assessment
-   - Coupling with other components
-
-3. **Change complexity:**
-   - Cognitive load to understand changes
-   - Risk assessment for the modifications
+Follow the complexity evaluation guidance in `.github/prompts/includes/review-quality-core.md`.
 
 ---
 
@@ -180,18 +139,7 @@ Validate testing in the PR:
 ---
 
 ### Step 8: Business Logic Validation
-
-Verify business logic clarity and correctness:
-
-1. **Intent alignment:** Does the implementation match ticket requirements?
-2. **Domain accuracy:** Are business terms used correctly?
-3. **Edge case handling:** Are business edge cases addressed?
-4. **Logic correctness:** Does the logic produce expected outcomes?
-
-**Questions to raise for unclear logic:**
-- What business rule does this implement?
-- Is this behavior documented or specified?
-- How does this interact with existing business rules?
+Follow the business-logic clarity guidance in `.github/prompts/includes/review-quality-core.md`.
 
 ---
 
@@ -268,14 +216,7 @@ Description of the issue or suggestion.
 ---
 
 ## Escalation Triggers
-
-Immediately flag for human reviewer attention if:
-- Any blocking security vulnerability detected
-- AC cannot be verified from the changes
-- Significant architectural concerns
-- Business logic appears incorrect
-- Test coverage decreased significantly
-- PR scope significantly exceeds ticket scope
+Follow `.github/prompts/includes/review-escalation-triggers.md`.
 
 ---
 

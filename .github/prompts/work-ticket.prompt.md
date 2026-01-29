@@ -28,12 +28,7 @@ Optional:
 
 **Refer to `.github/prompts/includes/ticket-detection.md` for shared ticket detection logic.**
 
-Apply the auto-detection steps:
-1. Parse input (numeric → GitHub, alphanumeric → Jira)
-2. Attempt to fetch from assumed platform
-3. If failed, try fallback platform
-4. If both fail, ask user for clarification and corrected ID
-5. Establish PLATFORM and TICKET_ID context
+Apply the auto-detection steps in the include and establish PLATFORM and TICKET_ID context.
 
 **Outputs from this step:**
 - `PLATFORM` = "github" | "jira"
@@ -95,40 +90,9 @@ Failures → fix root cause (never dilute tests).
 
 ---
 ## Phase 5.5: Pre-Commit Quality Review
-**Purpose:** Catch duplication and complexity issues before committing, enabling remediation before PR creation.
+Follow `.github/prompts/includes/pre-commit-quality-review.md` for duplication, complexity, and cleanup checks before committing.
 
-### 5.5.1 Duplication Scan
-1. **Local scan (before commit):** Use IDE or grep-based tools to identify obvious code duplication within the changeset
-   - Search for repeated blocks, similar method signatures, duplicate utility logic
-   - Within changeset vs. existing codebase in affected modules
-   - Flag for extraction if practical (utilities, helpers, base classes)
-
-2. **Remote analysis (post-PR):** Codacy or similar static analysis tools will provide comprehensive duplication metrics
-   - May require cutting the PR to trigger CI/CD analysis
-   - Review Codacy results for cross-module duplication, patterns missed in local scan
-   - If significant duplication detected: amend commits, push updates, re-analyze
-
-### 5.5.2 Complexity Check
-1. **Local complexity assessment (before commit):**
-   - Review method line counts (aim <20-30 lines per method; flag >50 lines)
-   - Check cyclomatic complexity mentally (nested conditionals, multiple branches)
-   - Identify deeply nested logic; flatten where possible (early returns, polymorphism, guards)
-   - Look for over-engineering (premature abstractions, unnecessary indirection, speculative generalization)
-
-2. **Remote complexity analysis (post-PR):** 
-   - Codacy and linters will report cyclomatic complexity, cognitive complexity, maintainability index
-   - May require cutting the PR to trigger analysis
-   - If thresholds exceeded: simplify (extract methods, reduce nesting, remove dead code), push updates, re-analyze
-
-### 5.5.3 Quality Gate Summary
-| Item | Local Check | Remote Check | Blocker |
-|------|------------|--------------|---------|
-| Code duplication | Search & extract obvious patterns | Codacy post-PR | Fix if same pattern >3x in changeset |
-| Method complexity | Review line counts & nesting | Cyclomatic complexity (post-PR) | Fix if >10-12 cyclomatic complexity |
-| Dead code | Remove unused imports, commented blocks | Linter post-PR | Remove all flagged items |
-| Over-engineering | Simplify abstractions, flatten logic | Codacy post-PR | Simplify if >7-8 nested levels |
-
-**Note:** Remote analysis may require cutting the PR and waiting for CI/CD results. Local checks should be completed before commit to minimize rework.
+After cutting the PR, review remote analysis results (Codacy/linters/CI) and remediate findings, then re-run checks as needed.
 
 ---
 ## Phase 6: Acceptance Verification
@@ -138,12 +102,11 @@ Failures → fix root cause (never dilute tests).
 6.4 Document deviations (justify or request plan update)
 
 ## Phase 7: Commit & PR
-7.1 `git add .`
-7.2 `git commit -m "feat(<scope>): {{JIRA_KEY}} <concise summary>"` (use `fix|chore|refactor|docs|test` as appropriate; include `-S` flag per `.github/prompts/includes/signed-commits-requirement.md` configuration)
-7.3 `git push -u origin <prefix>/{{JIRA_KEY}}-short-kebab-summary`
-7.4 Open PR (template) including: ticket, plan link, summary, risk (plan §6), rollout (plan §9), test evidence, flag usage
-7.5 Request CODEOWNERS & domain reviewers
-7.6 Comment PR link in Jira & transition → Code Review
+7.1 Use MCP Git/GitHub tools to stage and commit changes with a signed conventional commit message per `.github/prompts/includes/signed-commits-requirement.md`.
+7.2 Push to `<prefix>/{{JIRA_KEY}}-short-kebab-summary` via MCP GitHub tools.
+7.3 Open PR (template) including: ticket, plan link, summary, risk (plan §6), rollout (plan §9), test evidence, flag usage.
+7.4 Request CODEOWNERS & domain reviewers.
+7.5 Comment PR link in Jira & transition → Code Review.
 
 ---
 ## Phase 8: Code Review & Merge

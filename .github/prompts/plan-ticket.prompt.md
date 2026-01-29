@@ -33,12 +33,7 @@ Required:
 
 **Refer to `.github/prompts/includes/ticket-detection.md` for shared ticket detection logic.**
 
-Apply the auto-detection steps:
-1. Parse input (numeric → GitHub, alphanumeric → Jira)
-2. Attempt to fetch from assumed platform
-3. If failed, try fallback platform
-4. If both fail, ask user for clarification and corrected ID
-5. Establish PLATFORM and TICKET_ID context
+Apply the auto-detection steps in the include and establish PLATFORM and TICKET_ID context.
 
 **Outputs from this step:**
 - `PLATFORM` = "github" | "jira"
@@ -50,20 +45,13 @@ Apply the auto-detection steps:
 
 ## Step 0.5: Branch Management
 
-1. Ensure clean workspace (`git status` empty) and sync main:
-   - `git checkout main && git pull --ff-only`
-2. Determine branch prefix:
-   - GitHub: Use labels if present, default to `feature`
-   - Jira: Use ticket type (Story → feature, Bug → fix, Task → chore, Epic → epic)
-3. Create or reuse shared issue branch:
-   - Use GitHub MCP server to list/create branches as needed
-   - `git switch -c <PREFIX>/{{TICKET_ID}}-short-kebab-summary` (truncate ≤ ~60 chars) OR
-   - `git switch <PREFIX>/{{TICKET_ID}}-short-kebab-summary` if exists
-4. Confirm: "Planning {{PLATFORM}} {{TICKET_ID}} on branch <PREFIX>/{{TICKET_ID}}-short-kebab-summary"
-5. Future ticket updates must use appropriate API (GitHub or Jira) — never manual text unless API unavailable (then note fallback)
-   (Shared conventions: `.github/prompts/includes/branch-commit-guidance.md`)
+1. Ensure workspace is clean and default branch is up to date using MCP tooling (no shell commands).
+2. Determine branch prefix per `.github/prompts/includes/branch-commit-guidance.md`.
+3. Create or reuse the shared issue branch using MCP branch tools.
+4. Confirm: "Planning {{PLATFORM}} {{TICKET_ID}} on branch <PREFIX>/{{TICKET_ID}}-short-kebab-summary".
+5. Future ticket updates must use the appropriate platform API (GitHub or Jira); do not manually edit ticket content unless APIs are unavailable (note fallback).
 
-7. **Traceability alignment**
+6. **Traceability alignment**
     - Map each acceptance criterion to: requirement (or new requirement tag), milestone(s), feature flag(s), test type(s).
     - If creating new requirement tags, add them in the plan file’s summary—not the central plan (a later consolidation step can merge them).
 
@@ -216,14 +204,9 @@ Phases (RED → GREEN → Refactor). Enumerate steps with file specificity:
 - Incremental implementation order (domain → service → repo → controller/API → migrations → flag wiring)
 - Refactor pass (no behavior change)
 - **Pre-PR Duplication & Complexity Review** (MANDATORY):
-  * Review for duplication (within changeset and against existing code)
-  * Extract repeated logic into utilities/helpers
-  * Simplify methods: <20-30 lines, reduce cyclomatic complexity, flatten nested conditionals
-  * Remove dead code, unused imports, commented blocks
-  * Eliminate over-engineering (speculative abstractions, unnecessary indirection, premature optimization)
-  * Run static analysis (Codacy, linters), address findings
-  * Apply formatters (`npm run format`)
-  * Document remaining complexity with rationale
+  * Follow `.github/prompts/includes/pre-commit-quality-review.md` for local duplication, complexity, and cleanup checks
+  * Run static analysis (Codacy, linters) and apply formatters as applicable
+  * Document any remaining complexity with rationale
 - Docs & artifact updates (README, CHANGELOG, OpenAPI, drift script)
   Include validation command(s) for schema drift & build.
 
@@ -300,15 +283,7 @@ Every AC row filled (no blanks). Tasks reference milestone IDs if applicable.
 
 ## Commit & Push (after writing plan file)
 
-```
-git add docs/plan/tickets/{{JIRA_KEY}}-plan.md
-git commit -m "chore(plan): {{JIRA_KEY}} add implementation plan"
-git push -u origin <PREFIX>/{{JIRA_KEY}}-short-kebab-summary
-```
-
-**Note:** Signed commit requirements are managed in `.github/prompts/includes/signed-commits-requirement.md`. Include the `-S` flag per that include file's configuration.
-
-Open PR referencing the plan file; request CODEOWNERS.
+Use MCP GitHub tools to stage, commit, and push the plan file on the shared branch with a signed conventional commit message per `.github/prompts/includes/signed-commits-requirement.md`. Then open a PR referencing the plan file and request CODEOWNERS.
 
 ## Sanity Checklist (mentally tick)
 

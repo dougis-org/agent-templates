@@ -19,43 +19,25 @@ Optional:
 Execute the following checks in order. **If any check fails, abort immediately with a clear error message.**
 
 **0.1.1 Check for uncommitted changes:**
-```
-git status --porcelain
-```
-- If output is non-empty (uncommitted changes exist): **FATAL ERROR** - User must commit changes first. Provide guidance: `git add . && git commit -m "<message>"`
+- Use MCP Git tooling or repository diff APIs to verify a clean working tree.
+- If changes exist: **FATAL ERROR** - User must commit changes first.
 
 **0.1.2 Check for unpushed commits:**
-```
-git log origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --oneline
-```
-- If output is non-empty (commits not yet pushed): **FATAL ERROR** - User must push changes or authorize agent to push
-  - Offer: "Changes detected that have not been pushed to remote. I can push them for you with your approval. Proceed? (yes/no)"
-  - If user approves: `git push -u origin $(git rev-parse --abbrev-ref HEAD)` → wait for success
-  - If user declines: abort and provide guidance: `git push -u origin <branch-name>`
-  - If push fails: report error and abort
+- Use MCP GitHub/branch APIs to compare local HEAD with remote branch.
+- If commits are not pushed: **FATAL ERROR** - Ask for approval to push; if declined, abort with guidance.
 
 **0.1.3 Verify branch is up to date with remote:**
-```
-git fetch origin
-git rev-parse HEAD
-git rev-parse origin/$(git rev-parse --abbrev-ref HEAD)
-```
-- If the two SHAs do not match: **FATAL ERROR** - Current branch is behind remote. User must pull: `git pull origin $(git rev-parse --abbrev-ref HEAD)`
+- Compare local HEAD SHA to remote branch SHA via MCP tooling.
+- If behind: **FATAL ERROR** - User must sync branch before proceeding.
 
 **0.1.4 Get repository metadata:**
-- Determine CURRENT_BRANCH = `git rev-parse --abbrev-ref HEAD`
-- Determine DEFAULT_BRANCH = repository default branch (via GitHub API)
+- Determine CURRENT_BRANCH via MCP tooling.
+- Determine DEFAULT_BRANCH via GitHub API.
 - Verify CURRENT_BRANCH ≠ DEFAULT_BRANCH. If equal: **FATAL ERROR** - "Cannot cut PR from default branch to itself."
 
 **0.1.5 Verify no merge conflicts (dry-run):**
-```
-git merge --no-commit --no-ff origin/{{DEFAULT_BRANCH}} (on current branch)
-```
-Then:
-```
-git merge --abort
-```
-- If merge conflicts detected: **FATAL ERROR** - User must resolve conflicts manually. Provide guidance on resolving and pushing.
+- Use MCP merge-check or compare tooling to detect conflicts with DEFAULT_BRANCH.
+- If conflicts detected: **FATAL ERROR** - User must resolve conflicts manually before proceeding.
 
 **All checks passed?** → Proceed to Phase 1. Otherwise, halt and await user intervention.
 
@@ -74,15 +56,9 @@ git merge --abort
 - Otherwise: TICKET_ID remains unset (PR will proceed without ticket reference)
 
 **1.3 Analyze changes:**
-```
-git diff origin/{{DEFAULT_BRANCH}}...HEAD --stat
-```
-→ Store as CHANGES_SUMMARY (file-level overview)
-
-```
-git diff origin/{{DEFAULT_BRANCH}}...HEAD
-```
-→ Store as CHANGES_FULL (detailed diff for context)
+Use MCP compare/diff tooling to compute:
+- CHANGES_SUMMARY (file-level overview)
+- CHANGES_FULL (detailed diff for context)
 
 ---
 
