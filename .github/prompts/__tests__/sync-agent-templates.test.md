@@ -26,7 +26,7 @@ Contains 4 parameterized scenarios:
 - Directory contains cloned agent-templates repository
 - Timestamp suffix ensures uniqueness (no collision)
 **Assertion:** Temp path exists and contains `.github/` directory
-**Status:** 🔴 RED (implementation not yet exists)
+**Status:** 🔴 RED (not yet implemented)
 
 #### Test 1.2: Clone fails gracefully on network error
 **ID:** `test_clone_network_error_handling`
