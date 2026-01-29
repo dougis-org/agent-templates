@@ -2,7 +2,13 @@
 
 ## ⚠️ MODE REQUIREMENT
 
-Refer to `.github/prompts/includes/mode-enforcement.md` for prompt mode requirement.
+**This prompt requires the `work-ticket` chatmode to be active.**
+
+If you selected a different chatmode, please:
+1. Switch to `.github/chatmodes/work-ticket.chatmode.md`
+2. Return to this prompt
+
+The chatmode provides execution guardrails; this prompt provides specific workflow.
 
 **Tool Requirements:**
 Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
