@@ -14,20 +14,17 @@
 
 ---
 
-## 2) Assumptions & Open Questions
+## 2) Requirements
 
-### Assumptions
-1. The prompt will be a standalone `.github/prompts/sync-agent-templates.prompt.md` file
-2. Temporary clone location will be in system temp directory (e.g., `/tmp/agent-templates-<timestamp>`)
-3. User has read access to agent-templates repository (public or authenticated)
-4. Merge strategy will use simple three-way comparison (this repo version takes priority)
-5. File comparison will be content-based (not timestamp-based)
-6. The prompt will use MCP tools for file operations (no shell scripts)
-7. User confirmation required before any destructive operations
-8. Cleanup happens automatically after successful completion or on error
-
-### Open Questions
-None blocking. If merge conflicts are complex, user can manually resolve after initial attempt.
+1. Provide a standalone prompt at `.github/prompts/sync-agent-templates.prompt.md` that runs from any base repository.
+2. Acquire the agent-templates `.github` contents without using shell file operations; prefer MCP tools for file access and writes.
+3. Detect and categorize files as new (auto-copy) or conflicting (exists in both repos).
+4. Auto-copy new files without user prompts.
+5. Require explicit user confirmation before any overwrite or merge of existing files.
+6. Provide three deterministic user options for conflicts: overwrite all, overwrite none, attempt merge (template prioritized).
+7. For merge option, show side-by-side comparison and proposed merged output per file before writing.
+8. Always clean up temporary artifacts (clone/archive extraction) on success or error.
+9. Provide clear progress and summary output for each phase.
 
 ---
 
@@ -48,7 +45,7 @@ None blocking. If merge conflicts are complex, user can manually resolve after i
 
 ---
 
-## 4) Approach & Design Brief
+## 4) Implementation Design
 
 ### Current State
 - agent-templates repository contains `.github/agents/`, `.github/prompts/`, `.github/instructions/`, `.github/workflows/`, and `.github/ISSUE_TEMPLATE/` directories
@@ -57,13 +54,13 @@ None blocking. If merge conflicts are complex, user can manually resolve after i
 
 ### Proposed Changes
 Create a new prompt file that orchestrates a multi-step workflow:
-1. **Clone Phase:** Use git clone to create temporary local copy of agent-templates
+1. **Acquire Template Phase:** Prefer GitHub MCP APIs to fetch repository contents; if unavailable, request user approval to use `git clone` for a temporary local copy of agent-templates.
 2. **Discovery Phase:** List all files in agent-templates `.github/` directory
 3. **Comparison Phase:** For each file, check if it exists in base repo `.github/` directory
 4. **Auto-Copy Phase:** Copy non-conflicting files (not in base repo) immediately
 5. **Conflict Resolution Phase:** Present conflicting files to user with options
 6. **Execution Phase:** Execute user's selected strategy (overwrite all/none/merge)
-7. **Cleanup Phase:** Remove temporary clone directory
+7. **Cleanup Phase:** Remove temporary working directory
 
 ### Data Model / Schema
 No database or schema changes; file-system operations only.
@@ -85,6 +82,20 @@ No new APIs. Uses existing MCP tools:
 - `list_dir` for directory traversal
 - `read_file` for content comparison
 - `create_file` / `replace_string_in_file` for writing files
+
+### File-Level Change List
+
+#### New Files
+**(New)** `.github/prompts/sync-agent-templates.prompt.md`: Main prompt file with 7-phase workflow for syncing agent-templates to target repository
+
+**(New)** `.github/prompts/test-data/sync-scenarios.json`: Test data provider with parameterized scenarios for sync operations (clean repo, partial overlap, full conflict)
+
+**(New)** `.github/prompts/__tests__/sync-agent-templates.test.md`: Unit test suite with 9 test cases covering clone, discovery, categorization, merge, cleanup, and error handling
+
+#### Modified Files
+**(Updated)** `README.md`: Add "Syncing Agent Templates" section with usage instructions for new prompt
+
+**(Updated)** `TICKET_FLOW.md`: Reference sync prompt in setup/prerequisites section
 
 ### Feature Flags
 None required (prompt execution is user-initiated and explicit).
@@ -120,11 +131,11 @@ N/A - this is a new capability. No existing functionality to preserve.
 
 ---
 
-## 5) Step-by-Step Implementation Plan (TDD)
+### Step-by-Step Implementation Plan (TDD)
 
-### Phase 1: RED (Test First)
+#### Phase 1: RED (Test First)
 
-#### 1.1 Create Test Data Providers
+##### 1.1 Create Test Data Providers
 **(New)** `.github/prompts/test-data/sync-scenarios.json`:
 ```json
 {
@@ -147,7 +158,7 @@ N/A - this is a new capability. No existing functionality to preserve.
 }
 ```
 
-#### 1.2 Create Unit Tests (FAIL initially)
+##### 1.2 Create Unit Tests (FAIL initially)
 **(New)** `.github/prompts/__tests__/sync-agent-templates.test.md`:
 Test cases:
 - `test_clone_creates_temp_directory` - Verify temp clone path created with timestamp
@@ -162,9 +173,9 @@ Test cases:
 
 Run tests → expect FAIL (no implementation exists).
 
-### Phase 2: GREEN (Implementation)
+#### Phase 2: GREEN (Implementation)
 
-#### 2.1 Create Prompt File Structure
+##### 2.1 Create Prompt File Structure
 **(New)** `.github/prompts/sync-agent-templates.prompt.md`:
 Sections:
 - Header with mode enforcement reference
@@ -181,17 +192,18 @@ Sections:
 - Phase 7: Cleanup temp directory
 - Working rules & conventions
 
-#### 2.2 Implement Clone Logic
+##### 2.2 Implement Acquire Logic
 In `sync-agent-templates.prompt.md` Phase 1:
 ```markdown
-### Phase 1: Clone Agent Templates
+### Phase 1: Acquire Agent Templates
 1.1 Generate temp path: `/tmp/agent-templates-${timestamp}`
-1.2 Run: `git clone https://github.com/dougis-org/agent-templates.git <temp_path>`
-1.3 Verify clone success (check for `.git` directory)
-1.4 On failure: abort with error message and cleanup
+1.2 Prefer GitHub MCP API to fetch repository contents into `<temp_path>`
+1.3 If MCP repo fetch is unavailable, request user approval and use `git clone https://github.com/dougis-org/agent-templates.git <temp_path>`
+1.4 Verify acquisition success (check for `.github` directory)
+1.5 On failure: abort with error message and cleanup
 ```
 
-#### 2.3 Implement Discovery Logic
+##### 2.3 Implement Discovery Logic
 Phase 2:
 ```markdown
 ### Phase 2: Discover .github Contents
@@ -202,7 +214,7 @@ Phase 2:
 2.5 Update manifest: set `existsInBase` flag
 ```
 
-#### 2.4 Implement Categorization Logic
+##### 2.4 Implement Categorization Logic
 Phase 3:
 ```markdown
 ### Phase 3: Categorize Files
@@ -213,7 +225,7 @@ Phase 3:
 3.3 Report to user: "Found X new files, Y conflicts"
 ```
 
-#### 2.5 Implement Auto-Copy Logic
+##### 2.5 Implement Auto-Copy Logic
 Phase 4:
 ```markdown
 ### Phase 4: Auto-Copy Non-Conflicting Files
@@ -225,7 +237,7 @@ Phase 4:
 4.3 List copied files for user confirmation
 ```
 
-#### 2.6 Implement Conflict Resolution UI
+##### 2.6 Implement Conflict Resolution UI
 Phase 5:
 ```markdown
 ### Phase 5: Present Conflicts to User
@@ -239,7 +251,7 @@ Phase 5:
 5.3 Await user input (1, 2, or 3)
 ```
 
-#### 2.7 Implement Execution Strategies
+##### 2.7 Implement Execution Strategies
 Phase 6:
 ```markdown
 ### Phase 6: Execute User Selection
@@ -258,7 +270,7 @@ Phase 6:
    - Report merge results
 ```
 
-#### 2.8 Implement Cleanup
+##### 2.8 Implement Cleanup
 Phase 7:
 ```markdown
 ### Phase 7: Cleanup Temporary Clone
@@ -270,18 +282,18 @@ Phase 7:
 
 Run tests → expect PASS.
 
-### Phase 3: Refactor (Quality)
+#### Phase 3: Refactor (Quality)
 
-#### 3.1 Extract Reusable Patterns
-- Search for existing file comparison utilities (none found in grep search)
-- Consider extracting common file operations to `.github/prompts/includes/file-operations.md` if pattern emerges in future prompts
+##### 3.1 Extract Reusable Patterns
+- Search for existing file comparison utilities and test-data providers across the repo; no reusable utilities found outside prompts.
+- If future prompts introduce similar workflows, extract common file operations to `.github/prompts/includes/file-operations.md`.
 
-#### 3.2 Simplify Complex Sections
+##### 3.2 Simplify Complex Sections
 - Ensure each phase has <20 lines of instructions
 - Break down merge logic if it exceeds readability threshold
 - Add inline examples for user-facing prompts
 
-#### 3.3 Pre-PR Duplication & Complexity Review
+##### 3.3 Pre-PR Duplication & Complexity Review
 **Duplication checks:**
 - Compare with existing prompts for common patterns (clone, file operations, user confirmation)
 - No duplication found (this is a unique workflow)
@@ -294,7 +306,7 @@ Run tests → expect PASS.
 - Run markdownlint on new prompt file
 - Apply formatting (`prettier` if configured)
 
-#### 3.4 Documentation Updates
+##### 3.4 Documentation Updates
 **(Updated)** `README.md`:
 Add section:
 ```markdown
@@ -310,50 +322,7 @@ Add reference to sync prompt in "Setup & Prerequisites" section (if exists, othe
 
 ---
 
-## 6) Effort, Risks, Mitigations
-
-### Effort
-**Medium (M)** - Estimated 4-6 hours total
-- Prompt design & documentation: 2 hours
-- Implementation & testing: 2 hours
-- Manual QA & edge case handling: 1-2 hours
-
-Justification:
-- Moderate complexity due to multi-phase workflow
-- User interaction adds time for UX design
-- File operations are well-understood (not novel)
-- No backend/API integration required
-
-### Risks & Mitigations
-
-| Risk | Severity | Likelihood | Mitigation | Fallback |
-|------|----------|-----------|------------|----------|
-| **Git clone fails** (network, auth) | High | Medium | Check network connectivity first; provide clear error message with retry instructions | User manually clones and provides local path |
-| **Merge logic produces invalid output** | High | Low | Show user proposed merge before writing; require confirmation | User manually merges files; overwrite option bypasses merge |
-| **Temp directory not cleaned up** | Medium | Low | Add error handling to ensure cleanup even on failure; use try-finally pattern in logic | User manually deletes temp directory if notified of path |
-| **Large .github folder** (slow operations) | Low | Low | Report progress during discovery and copy phases | No fallback needed; acceptable delay <1 min |
-| **Permission errors** (read/write) | Medium | Medium | Check permissions before attempting operations; provide clear error messages | User manually copies files with elevated permissions |
-| **Cross-platform path issues** | Low | Low | Use platform-agnostic path separators; test on Windows/Linux/Mac | Document known issues; users can manually adjust paths |
-
----
-
-## 7) File-Level Change List
-
-### New Files
-**(New)** `.github/prompts/sync-agent-templates.prompt.md`: Main prompt file with 7-phase workflow for syncing agent-templates to target repository
-
-**(New)** `.github/prompts/test-data/sync-scenarios.json`: Test data provider with parameterized scenarios for sync operations (clean repo, partial overlap, full conflict)
-
-**(New)** `.github/prompts/__tests__/sync-agent-templates.test.md`: Unit test suite with 9 test cases covering clone, discovery, categorization, merge, cleanup, and error handling
-
-### Modified Files
-**(Updated)** `README.md`: Add "Syncing Agent Templates" section with usage instructions for new prompt
-
-**(Updated)** `TICKET_FLOW.md` (if applicable): Reference sync prompt in setup/prerequisites section
-
----
-
-## 8) Test Plan
+## 5) Test Plan & Pre-Commit Quality Review
 
 ### Parameterized Test Strategy
 All sync scenarios use data provider: `.github/prompts/test-data/sync-scenarios.json`
@@ -403,7 +372,28 @@ All sync scenarios use data provider: `.github/prompts/test-data/sync-scenarios.
 
 ---
 
-## 9) Rollout & Monitoring Plan
+### Pre-Commit Quality Review (Required)
+1. **Duplication review:** Ensure no copy-paste logic across phases; consolidate repeated prompt steps if found.
+2. **Complexity reduction:** Simplify merge logic to clear, single-responsibility sub-steps.
+3. **Dead code removal:** Remove unused steps or optional flows not invoked.
+4. **Static analysis:** Run markdownlint on new/updated prompt docs and resolve all findings.
+
+---
+
+## 6) Risk & Rollout
+
+### Risks & Mitigations
+
+| Risk | Severity | Likelihood | Mitigation | Fallback |
+|------|----------|-----------|------------|----------|
+| **Repository acquisition fails** (network, auth) | High | Medium | Check connectivity; provide retry steps; request user approval before fallback | User manually provides local path |
+| **Merge logic produces invalid output** | High | Low | Show proposed merge before writing; require confirmation | User manually merges files; overwrite option bypasses merge |
+| **Temp directory not cleaned up** | Medium | Low | Ensure cleanup on success and error; use try-finally pattern in logic | User manually deletes temp directory if notified of path |
+| **Large .github folder** (slow operations) | Low | Low | Report progress during discovery and copy phases | Acceptable delay <1 min |
+| **Permission errors** (read/write) | Medium | Medium | Check permissions before attempting operations; provide clear error messages | User manually copies files with elevated permissions |
+| **Cross-platform path issues** | Low | Low | Use platform-agnostic path separators; test on Windows/Linux/Mac | Document known issues; users can manually adjust paths |
+
+### Rollout & Monitoring Plan
 
 ### Feature Flags
 None required. Prompt execution is explicit user action.
@@ -436,11 +426,72 @@ If prompt causes issues:
 4. Fix bugs in separate branch
 5. Re-release with updated version
 
-Commands:
-```bash
-git revert <commit-hash>
-git push origin main
-```
+Commands are executed via MCP tooling or GitHub UI; avoid shell commands.
+
+---
+
+## 7) Observability
+
+1. User-facing progress updates for each phase (Acquire, Discover, Compare, Auto-copy, Conflict Resolution, Execute, Cleanup).
+2. File operation summary: X files copied, Y conflicts skipped/merged, Z errors.
+3. Error messaging with remediation guidance and explicit cleanup confirmation.
+
+---
+
+## 8) Effort & Dependencies
+
+### Effort
+**Medium (M)** - Estimated 4-6 hours total
+- Prompt design & documentation: 2 hours
+- Implementation & testing: 2 hours
+- Manual QA & edge case handling: 1-2 hours
+
+Justification:
+- Moderate complexity due to multi-phase workflow
+- User interaction adds time for UX design
+- File operations are well-understood (not novel)
+- No backend/API integration required
+
+### Dependencies
+- GitHub MCP server (for issue context; optional for repository content retrieval)
+- MCP Desktop Commander server (file operations)
+- Optional: Git CLI if user approves fallback acquisition
+
+---
+
+## 9) Open Questions / Assumptions
+
+### Assumptions
+1. The prompt will be a standalone `.github/prompts/sync-agent-templates.prompt.md` file.
+2. Temporary clone location will be in system temp directory (e.g., `/tmp/agent-templates-<timestamp>`).
+3. User has read access to agent-templates repository (public or authenticated).
+4. Merge strategy uses template-priority comparison and explicit per-file confirmation.
+5. File comparison is content-based (not timestamp-based).
+6. MCP tools are used for file operations; shell file operations are forbidden.
+7. User confirmation required before any destructive operations.
+8. Cleanup happens automatically after successful completion or on error.
+
+### Open Questions
+None blocking. If merge conflicts are complex, user can manually resolve after initial attempt.
+
+---
+
+## 10) Related Tickets
+
+- GitHub Issue [#3](https://github.com/dougis-org/agent-templates/issues/3)
+
+---
+
+## 11) Decomposition (if applicable)
+
+Single deliverable recommended.
+- Scope is a single prompt + documentation updates in this repo.
+- All ACs map to a single workflow with shared data flow and no separate subsystems.
+- Effort is <1 day of work; no parallelization needed.
+
+---
+
+## Appendix: Handoff Package
 
 ---
 
@@ -482,7 +533,7 @@ npx markdown-link-check .github/prompts/sync-agent-templates.prompt.md
 
 ---
 
-## 11) Traceability Map
+## Traceability Map
 
 | Criterion # | Requirement | Milestone | Task(s) | Flag(s) | Test(s) |
 |-------------|-------------|-----------|---------|---------|---------|
