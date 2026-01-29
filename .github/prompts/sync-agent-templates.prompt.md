@@ -67,7 +67,7 @@ Confirm that:
 ### 0.3 Generate Temporary Path
 
 1. Generate timestamp: `TIMESTAMP=$(date +%Y%m%d%H%M%S)`
-2. Create temp path: `TEMP_CLONE_PATH="/tmp/agent-templates-${TIMESTAMP}"`
+2. Create temp path in the system's temporary directory: `TEMP_CLONE_PATH="<system_temp_dir>/agent-templates-${TIMESTAMP}"`
 3. Verify path uniqueness (ensure no collision with existing directories)
 
 **Output:** "Temporary workspace: `<TEMP_CLONE_PATH>`"
