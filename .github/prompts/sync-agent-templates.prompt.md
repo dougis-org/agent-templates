@@ -121,7 +121,7 @@ Recursively list all files in `<TEMP_CLONE_PATH>/.github/`:
 3. Exclude:
    - `.git/` directories (should not be present in `.github/` typically)
    - `.gitignore` files
-   - Binary executables (heuristic: file size >10MB or non-text MIME type)
+   - Binary files (e.g., based on file extension like .png, .jpg, .zip, .exe, or file size > 10MB)
 4. Include all other files: `.md`, `.json`, `.yml`, `.sh`, etc.
 
 ### 2.2 Build Template Manifest
