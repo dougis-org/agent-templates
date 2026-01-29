@@ -10,10 +10,7 @@ To synchronize the latest prompts, agents, and workflows from this repository in
 
 1. **Navigate to your target repository** (the repository where you want to copy agent-templates files)
 
-2. **Run the sync prompt:**
-   ```
-   Invoke the sync-agent-templates prompt
-   ```
+2. **Run the sync prompt** by opening [.github/prompts/sync-agent-templates.prompt.md](.github/prompts/sync-agent-templates.prompt.md) in your prompt runner (for example, GitHub Copilot Chat) and following the instructions in that file.
 
 3. **Choose your conflict resolution strategy:**
    - **Overwrite all files**: Replace existing `.github` files with agent-templates versions (recommended if agent-templates is canonical)
