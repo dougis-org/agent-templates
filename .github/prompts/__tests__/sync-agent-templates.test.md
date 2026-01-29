@@ -220,7 +220,7 @@ Contains 4 parameterized scenarios:
 - Temporary clone directory removed recursively
 - Verification: temp path does not exist
 - Summary: "Cleanup complete. Temporary files removed."
-**Assertion:** `stat /tmp/agent-templates-*` returns "no such file" after cleanup
+**Assertion:** Using MCP file operations, list the parent temp directory and assert that the temporary clone directory path is absent (does not exist) after cleanup.
 **Status:** 🔴 RED
 
 #### Test 7.2: Cleanup on error

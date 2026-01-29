@@ -78,7 +78,7 @@ No database or schema changes; file-system operations only.
 
 ### APIs & Contracts
 No new APIs. Uses existing MCP tools:
-- `mcp_desktop-comma_*` for file operations
+- `mcp_desktop-command_*` for file operations
 - `list_dir` for directory traversal
 - `read_file` for content comparison
 - `create_file` / `replace_string_in_file` for writing files

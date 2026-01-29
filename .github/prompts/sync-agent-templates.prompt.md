@@ -87,7 +87,7 @@ Confirm that:
 Attempt to clone agent-templates using git:
 
 ```
-git clone https://github.com/dougis-org/agent-templates.git <TEMP_CLONE_PATH>
+git clone ${TEMPLATE_REPO_URL:-https://github.com/dougis-org/agent-templates.git} <TEMP_CLONE_PATH>
 ```
 
 **On success:**
