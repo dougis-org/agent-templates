@@ -22,10 +22,10 @@ Contains 4 parameterized scenarios:
 **ID:** `test_clone_creates_temp_directory`
 **Input:** Execute prompt in clean repository
 **Expected:**
-- Temporary directory created at `/tmp/agent-templates-<YYYYMMDDHHmmss>` (or platform-specific temp)
+- Temporary directory created under the OS temp directory (for example, `<os-temp>/agent-templates-<YYYYMMDDHHmmss>`)
 - Directory contains cloned agent-templates repository
 - Timestamp suffix ensures uniqueness (no collision)
-**Assertion:** Temp path exists and contains `.github/` directory
+**Assertion:** Resolved temp path (from OS/tooling) exists and contains `.github/` directory
 **Status:** 🔴 RED (not yet implemented)
 
 #### Test 1.2: Clone fails gracefully on network error

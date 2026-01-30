@@ -1,14 +1,19 @@
+---
+description: 'Synchronize `.github` folder contents from agent-templates repository into any base repository with conflict detection and user-controlled resolution strategies.'
+mode: 'sync-agent-templates'
+---
+
 # Sync Agent Templates Prompt
 
 ## ⚠️ MODE REQUIREMENT
 
-**This prompt requires the `work-ticket` chatmode to be active.**
+**This prompt requires the `sync-agent-templates` mode to be active.**
 
-If you selected a different chatmode, please:
-1. Switch to `.github/chatmodes/work-ticket.chatmode.md`
+If you selected a different mode, please:
+1. Switch to the `sync-agent-templates` mode
 2. Return to this prompt
 
-The chatmode provides execution guardrails; this prompt provides specific workflow.
+The mode provides execution guardrails; this prompt provides specific workflow.
 
 **Tool Requirements:**
 Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
@@ -26,15 +31,15 @@ Enable synchronization of `.github` folder contents from the `dougis-org/agent-t
 **Required:** None (executes in current working repository)
 
 **Optional:**
-- `MERGE_STRATEGY`: Override default merge behavior (values: "auto-copy-only", "overwrite-all", "overwrite-none", "merge")
 - `TEMPLATE_REPO_URL`: Custom template repo URL (default: `https://github.com/dougis-org/agent-templates.git`)
-- `DRY_RUN`: Preview changes without writing (default: false)
+
+**Note:** `MERGE_STRATEGY` and `DRY_RUN` are reserved for future enhancements and are not currently implemented in this version.
 
 ---
 
 ## Overview
 
-This prompt orchestrates a 7-phase workflow to synchronize `.github` folder contents from agent-templates into a target repository:
+This prompt orchestrates an 8-phase workflow to synchronize `.github` folder contents from agent-templates into a target repository:
 
 1. **Workspace Validation:** Verify working repository is valid and accessible
 2. **Acquire:** Clone agent-templates to temporary directory
@@ -72,8 +77,8 @@ Confirm that:
 
 ### 0.3 Generate Temporary Path
 
-1. Generate timestamp: `TIMESTAMP=$(date +%Y%m%d%H%M%S)`
-2. Create temp path in the system's temporary directory: `TEMP_CLONE_PATH="<system_temp_dir>/agent-templates-${TIMESTAMP}"`
+1. Generate timestamp using language-native function or system time (e.g., current Unix timestamp or datetime formatted as `YYYYMMDDHHMMSS`)
+2. Create temp path in the system's temporary directory (Windows: `%TEMP%`, macOS/Linux: `/tmp` or `$TMPDIR`): `TEMP_CLONE_PATH="<system_temp_dir>/agent-templates-<TIMESTAMP>"`
 3. Verify path uniqueness (ensure no collision with existing directories)
 
 **Output:** "Temporary workspace: `<TEMP_CLONE_PATH>`"
@@ -123,11 +128,11 @@ git clone ${TEMPLATE_REPO_URL:-https://github.com/dougis-org/agent-templates.git
 Recursively list all files in `<TEMP_CLONE_PATH>/.github/`:
 
 1. Walk directory tree starting from `.github/`
-2. Capture relative paths (relative to `.github/` directory)
+2. Capture relative paths (relative to `.github/` directory; e.g., `prompts/plan-ticket.prompt.md`, not `.github/prompts/plan-ticket.prompt.md`)
 3. Exclude:
    - `.git/` directories (should not be present in `.github/` typically)
    - `.gitignore` files
-   - Binary files (e.g., based on file extension like .png, .jpg, .zip, .exe, or file size > 10MB)
+   - Binary files (based on file extension like .png, .jpg, .zip, .exe, or file size > 10MB)
 4. Include all other files: `.md`, `.json`, `.yml`, `.sh`, etc.
 
 ### 2.2 Build Template Manifest
@@ -136,7 +141,7 @@ Create in-memory manifest:
 ```
 TEMPLATE_MANIFEST = [
   {
-    filePath: ".github/prompts/plan-ticket.prompt.md",
+    filePath: "prompts/plan-ticket.prompt.md",
     existsInTemplate: true,
     existsInBase: null,  // To be determined in Phase 3
     status: null,        // To be determined in Phase 3
@@ -179,7 +184,7 @@ Discovery Summary:
 
 For each file in `TEMPLATE_MANIFEST`:
 
-1. Check if file exists at `<BASE_REPO_ROOT>/.github/<filePath>`
+1. Check if file exists at `<BASE_REPO_ROOT>/.github/<filePath>` (note: `filePath` is relative to `.github/`; e.g., `<BASE_REPO_ROOT>/.github/prompts/plan-ticket.prompt.md`)
 2. Set `existsInBase` flag (true/false)
 3. Update status:
    - If `existsInBase == false`: `status = 'auto-copy'`
@@ -227,14 +232,14 @@ For each file in `autoCopyFiles`:
 
 1. Read file content from `<TEMP_CLONE_PATH>/.github/<filePath>`
 2. Determine target path: `<BASE_REPO_ROOT>/.github/<filePath>`
-3. Create parent directories as needed (e.g., `.github/prompts/`, `.github/workflows/`)
+3. Create parent directories as needed using MCP file operations
 4. Write file to target path with identical content
 5. Record success in manifest
 
 **MCP Tool Usage:**
-- Use `list_dir` or similar to verify/create parent directories
-- Use `read_file` to read template file
-- Use `create_file` to write new file to base repo
+- Use `desktop-commander/list_directory` to verify/create parent directories
+- Use `desktop-commander/read_file` to read template file
+- Use `desktop-commander/create_file` to write new file to base repo (or `desktop-commander/edit_block` for updates)
 
 ### 4.2 Report Auto-Copy Results
 
@@ -269,7 +274,7 @@ Output confirmation:
 
 ### 5.1 Present Conflicts to User
 
-If `conflictFiles` is empty: Skip to Phase 6 (Cleanup).
+If `conflictFiles` is empty: Skip to Phase 7 (Cleanup).
 
 If conflicts exist, display:
 
@@ -328,8 +333,8 @@ For each file in `conflictFiles`:
 3. Record action in manifest
 
 **MCP Tool Usage:**
-- Use `read_file` to read template version
-- Use `replace_string_in_file` or `create_file` to overwrite base repo file
+- Use `desktop-commander/read_file` to read template version
+- Use `desktop-commander/edit_block` to overwrite base repo file (or `desktop-commander/create_file` for new files)
 
 **Output:**
 ```
@@ -406,9 +411,9 @@ Accept this merge? (y/n)
 - Record decision in manifest
 
 **MCP Tool Usage:**
-- Use `read_file` to read both versions
+- Use `desktop-commander/read_file` to read both versions
 - Display diff logic locally (no special tool needed for text comparison)
-- Use `replace_string_in_file` to write merged version if approved
+- Use `desktop-commander/edit_block` to write merged version if approved (or `desktop-commander/create_file` for new files)
 
 #### 6.3.4 Iterate Through All Conflicts
 
@@ -450,14 +455,11 @@ Confirm `TEMP_CLONE_PATH` exists and is a directory (safety check before deletio
 
 ### 7.2 Remove Directory Recursively
 
-Delete the temporary clone directory:
+Delete the temporary clone directory using MCP file operations:
 
-```
-rm -rf <TEMP_CLONE_PATH>
-```
-
-**Alternative (if shell unavailable):**
-- Use MCP file operations to recursively delete directory contents
+1. Use `desktop-commander/list_directory` to enumerate all files and subdirectories recursively
+2. Delete files and directories from leaf to root using appropriate MCP deletion mechanisms
+3. Alternatively, if available, use a platform-specific temp directory cleanup function that the MCP tooling provides
 
 ### 7.3 Verify Cleanup
 
@@ -465,7 +467,7 @@ Confirm that `TEMP_CLONE_PATH` no longer exists.
 
 **On failure:**
 - Error message: "Cleanup failed: could not remove temporary directory at <TEMP_CLONE_PATH>"
-- Guidance: "You may manually delete this directory: `rm -rf <TEMP_CLONE_PATH>`"
+- Guidance: "Please manually delete this directory using your system's file manager or terminal commands appropriate for your OS."
 
 ### 7.4 Cleanup Summary
 
@@ -510,9 +512,9 @@ Next steps:
 
 ## Working Rules
 
-1. **MCP-First:** Use MCP tools for file operations (list_dir, read_file, create_file, replace_string_in_file). Avoid shell commands except where necessary (e.g., `git clone`, `rm`).
+1. **MCP-First:** Use MCP tools for file operations (desktop-commander/list_directory, desktop-commander/read_file, desktop-commander/create_file, desktop-commander/edit_block). Avoid shell commands except where MCP tools are unavailable (e.g., `git clone` if GitHub API unavailable).
 2. **No Destructive Actions Without Confirmation:** Never overwrite or delete base repo files without user approval (except auto-copy of new files).
-3. **Temp Directory Hygiene:** Always cleanup `TEMP_CLONE_PATH` on success or error.
+3. **Temp Directory Hygiene:** Always cleanup `TEMP_CLONE_PATH` on success or error using MCP file operations.
 4. **Clear Progress Updates:** Report status after each phase.
 5. **User Control:** Provide options for conflict resolution; prioritize user choice.
 6. **Fail-Fast:** Exit early on validation errors (Phase 0); provide clear guidance.
@@ -544,7 +546,7 @@ Run tests after implementation to verify all acceptance criteria met.
 - **Plan:** [docs/plan/tickets/3-plan.md](docs/plan/tickets/3-plan.md)
 - **Test Suite:** [.github/prompts/__tests__/sync-agent-templates.test.md](.github/prompts/__tests__/sync-agent-templates.test.md)
 - **Test Data:** [.github/prompts/test-data/sync-scenarios.json](.github/prompts/test-data/sync-scenarios.json)
-- **Related:** [README.md syncing section](/README.md#syncing-agent-templates)
+- **Related:** [README.md syncing section](../../README.md#syncing-agent-templates)
 
 ---
 

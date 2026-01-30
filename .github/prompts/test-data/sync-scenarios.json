@@ -8,7 +8,7 @@
             "templateFiles": [
                 ".github/prompts/plan-ticket.prompt.md",
                 ".github/prompts/work-ticket.prompt.md",
-                ".github/agents/example-agent.md"
+                ".github/agents/work-ticket.agent.md"
             ],
             "expectedAutoCopy": 3,
             "expectedConflicts": 0,
@@ -24,7 +24,7 @@
             "templateFiles": [
                 ".github/prompts/plan-ticket.prompt.md",
                 ".github/prompts/work-ticket.prompt.md",
-                ".github/agents/example-agent.md"
+                ".github/agents/work-ticket.agent.md"
             ],
             "expectedAutoCopy": 2,
             "expectedConflicts": 1,
@@ -37,12 +37,12 @@
             "baseRepoFiles": [
                 ".github/prompts/plan-ticket.prompt.md",
                 ".github/prompts/work-ticket.prompt.md",
-                ".github/agents/example-agent.md"
+                ".github/agents/work-ticket.agent.md"
             ],
             "templateFiles": [
                 ".github/prompts/plan-ticket.prompt.md",
                 ".github/prompts/work-ticket.prompt.md",
-                ".github/agents/example-agent.md"
+                ".github/agents/work-ticket.agent.md"
             ],
             "expectedAutoCopy": 0,
             "expectedConflicts": 3,
