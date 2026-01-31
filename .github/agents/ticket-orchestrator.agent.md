@@ -9,19 +9,7 @@ keywords:
   - "human approval"
   - "quality enforcement"
 tools:
-  - "runSubagent"
-  - "github-pull-request_activePullRequest"
-  - "github-pull-request_copilot-coding-agent"
-  - "mcp_gh-issues_issue_read"
-  - "mcp_gh-issues_issue_write"
-  - "mcp_gh-issues_add_issue_comment"
-  - "mcp_github_github_get_file_contents"
-  - "mcp_github_github_create_branch"
-  - "mcp_desktop-comma_start_process"
-  - "mcp_desktop-comma_interact_with_process"
-  - "read_file"
-  - "create_file"
-  - "manage_todo_list"
+  ['read/readFile', 'deepcontext/*', 'desktop-commander-wonderwhy/read_file', 'gh-issues/*', 'gh-labels/*', 'gh-projects/*', 'github/add_comment_to_pending_review', 'github/assign_copilot_to_issue', 'github/get_me', 'github/list_issue_types', 'github/list_issues', 'github/request_copilot_review', 'github/search_issues', 'markdownlint/*', 'agent']
 ---
 
 # Orchestrator Agent
