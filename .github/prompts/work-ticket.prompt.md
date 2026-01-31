@@ -46,7 +46,9 @@ Apply the auto-detection steps:
 0.1 Apply ticket detection (see Ticket Detection & Platform Resolution section above)
 0.2 Load plan at `docs/plan/tickets/{{TICKET_ID}}-plan.md`; verify all 11 sections present and parse
 0.3 Summarize (Sections 1, 3, 6) for confirmation.
-0.4 If not already in progress, use appropriate platform API (GitHub or Jira) to update ticket status and add start comment. If API fails, note fallback and proceed cautiously.
+0.4 Ensure the working branch in the plan is checked out locally
+0.5 Commit the plan to the working branch (if not already committed)
+0.6 If not already in progress, use appropriate platform API (GitHub or Jira) to update ticket status and add start comment. If API fails, note fallback and proceed cautiously.
 
 ## Phase 2: TDD (RED)
 2.1 Unit tests (nominal + boundary + error) 
