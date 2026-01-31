@@ -1,5 +1,5 @@
 ---
-description: 'Synchronize `.github` folder contents from agent-templates repository into any base repository with conflict detection and user-controlled resolution strategies.'
+description: 'Synchronize `.github` folder, `CLAUDE.md`, and `.claude/` directory from agent-templates repository into any base repository with conflict detection and user-controlled resolution strategies.'
 mode: 'sync-agent-templates'
 ---
 
@@ -22,7 +22,7 @@ Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MC
 
 ## Goal
 
-Enable synchronization of `.github` folder contents from the `dougis-org/agent-templates` repository into any base repository, with automatic detection of new files, conflict detection for existing files, and user-controlled resolution strategies (overwrite all, overwrite none, or merge with template priority).
+Enable synchronization of `.github` folder contents, `CLAUDE.md`, and `.claude/` directory from the `dougis-org/agent-templates` repository into any base repository, with automatic detection of new files, conflict detection for existing files, and user-controlled resolution strategies (overwrite all, overwrite none, or merge with template priority).
 
 ---
 
@@ -39,11 +39,11 @@ Enable synchronization of `.github` folder contents from the `dougis-org/agent-t
 
 ## Overview
 
-This prompt orchestrates an 8-phase workflow to synchronize `.github` folder contents from agent-templates into a target repository:
+This prompt orchestrates an 8-phase workflow to synchronize `.github` folder contents, `CLAUDE.md`, and `.claude/` directory from agent-templates into a target repository:
 
 1. **Workspace Validation:** Verify working repository is valid and accessible
 2. **Acquire:** Clone agent-templates to temporary directory
-3. **Discovery:** Enumerate all files in agent-templates `.github/` directory
+3. **Discovery:** Enumerate all files in agent-templates `.github/` directory, `CLAUDE.md`, and `.claude/` directory
 4. **Categorize:** Classify files as new (auto-copy) or conflicting (exists in base)
 5. **Auto-Copy:** Write new files to base repository without user confirmation
 6. **Conflict Resolution:** Present conflicting files to user with resolution strategies
@@ -59,8 +59,9 @@ This prompt orchestrates an 8-phase workflow to synchronize `.github` folder con
 Confirm that:
 1. Current directory is a Git repository (contains `.git/` directory)
 2. `.github/` folder exists or can be created in base repository
-3. Sufficient disk space available for temporary clone
-4. Write permissions available for base repository
+3. `.claude/` folder exists or can be created in base repository
+4. Sufficient disk space available for temporary clone
+5. Write permissions available for base repository
 
 **On failure:**
 - Error message: "Not a valid Git repository or .git directory not found"
@@ -98,6 +99,8 @@ git clone ${TEMPLATE_REPO_URL:-https://github.com/dougis-org/agent-templates.git
 **On success:**
 - Confirm clone completed
 - Verify `.github/` directory exists in clone
+- Verify `CLAUDE.md` exists in clone root
+- Verify `.claude/` directory exists in clone root
 - Output: "Cloned agent-templates to temporary directory"
 
 **On failure (network error, auth failure):**
@@ -114,8 +117,11 @@ git clone ${TEMPLATE_REPO_URL:-https://github.com/dougis-org/agent-templates.git
 ### 1.2 Verify Clone Integrity
 
 1. Check that `.github/` directory exists in `TEMP_CLONE_PATH`
-2. List contents of `.github/` to confirm files present
-3. If missing: treat as error; offer retry or abort
+2. Check that `CLAUDE.md` exists in `TEMP_CLONE_PATH` root
+3. Check that `.claude/` directory exists in `TEMP_CLONE_PATH` root
+4. List contents of `.github/` and `.claude/` to confirm files present
+5. If `.github/` missing: treat as error; offer retry or abort
+6. If `CLAUDE.md` or `.claude/` missing: warn but continue (`.github/` is the primary sync target)
 
 **Output:** "Verified agent-templates clone integrity"
 
@@ -125,27 +131,52 @@ git clone ${TEMPLATE_REPO_URL:-https://github.com/dougis-org/agent-templates.git
 
 ### 2.1 Enumerate Template Files
 
-Recursively list all files in `<TEMP_CLONE_PATH>/.github/`:
+Recursively list all syncable files from the cloned agent-templates repo. There are three sync targets:
 
-1. Walk directory tree starting from `.github/`
-2. Capture relative paths (relative to `.github/` directory; e.g., `prompts/plan-ticket.prompt.md`, not `.github/prompts/plan-ticket.prompt.md`)
-3. Exclude:
-   - `.git/` directories (should not be present in `.github/` typically)
-   - `.gitignore` files
-   - Binary files (based on file extension like .png, .jpg, .zip, .exe, or file size > 10MB)
-4. Include all other files: `.md`, `.json`, `.yml`, `.sh`, etc.
+**Target 1: `.github/` directory**
+1. Walk directory tree starting from `<TEMP_CLONE_PATH>/.github/`
+2. Capture relative paths from repo root (e.g., `.github/prompts/plan-ticket.prompt.md`)
+
+**Target 2: `CLAUDE.md` root file**
+1. Check for `<TEMP_CLONE_PATH>/CLAUDE.md`
+2. Capture as relative path `CLAUDE.md`
+
+**Target 3: `.claude/` directory**
+1. Walk directory tree starting from `<TEMP_CLONE_PATH>/.claude/`
+2. Capture relative paths from repo root (e.g., `.claude/commands/work-ticket.md`)
+
+**Exclusions (apply to all targets):**
+- `.git/` directories
+- `.gitignore` files
+- Binary files (based on file extension like .png, .jpg, .zip, .exe, or file size > 10MB)
+
+**Include** all other files: `.md`, `.json`, `.yml`, `.sh`, etc.
 
 ### 2.2 Build Template Manifest
 
-Create in-memory manifest:
+Create in-memory manifest (paths are relative to repo root):
 ```
 TEMPLATE_MANIFEST = [
   {
-    filePath: "prompts/plan-ticket.prompt.md",
+    filePath: ".github/prompts/plan-ticket.prompt.md",
     existsInTemplate: true,
     existsInBase: null,  // To be determined in Phase 3
     status: null,        // To be determined in Phase 3
     contentHash: null    // Optional for quick comparison
+  },
+  {
+    filePath: "CLAUDE.md",
+    existsInTemplate: true,
+    existsInBase: null,
+    status: null,
+    contentHash: null
+  },
+  {
+    filePath: ".claude/commands/work-ticket.md",
+    existsInTemplate: true,
+    existsInBase: null,
+    status: null,
+    contentHash: null
   },
   ...
 ]
@@ -158,22 +189,25 @@ Output summary:
 Discovery Summary:
 - Template files found: <COUNT>
 - Categories:
-  - Prompts: <COUNT>
-  - Agents: <COUNT>
-  - Workflows: <COUNT>
+  - Prompts (.github/prompts/): <COUNT>
+  - Agents (.github/agents/): <COUNT>
+  - Workflows (.github/workflows/): <COUNT>
+  - Instructions (.github/instructions/): <COUNT>
+  - Claude Code (.claude/ + CLAUDE.md): <COUNT>
   - Other: <COUNT>
 ```
 
 **Example output:**
 ```
 Discovery Summary:
-- Template files found: 18
+- Template files found: 28
 - Categories:
-  - Prompts: 5
-  - Agents: 3
-  - Workflows: 4
-  - Instructions: 4
-  - Other: 2
+  - Prompts (.github/prompts/): 5
+  - Agents (.github/agents/): 3
+  - Workflows (.github/workflows/): 4
+  - Instructions (.github/instructions/): 4
+  - Claude Code (.claude/ + CLAUDE.md): 9
+  - Other: 3
 ```
 
 ---
@@ -184,7 +218,7 @@ Discovery Summary:
 
 For each file in `TEMPLATE_MANIFEST`:
 
-1. Check if file exists at `<BASE_REPO_ROOT>/.github/<filePath>` (note: `filePath` is relative to `.github/`; e.g., `<BASE_REPO_ROOT>/.github/prompts/plan-ticket.prompt.md`)
+1. Check if file exists at `<BASE_REPO_ROOT>/<filePath>` (note: `filePath` is relative to repo root; e.g., `<BASE_REPO_ROOT>/.github/prompts/plan-ticket.prompt.md`, `<BASE_REPO_ROOT>/CLAUDE.md`, `<BASE_REPO_ROOT>/.claude/commands/work-ticket.md`)
 2. Set `existsInBase` flag (true/false)
 3. Update status:
    - If `existsInBase == false`: `status = 'auto-copy'`
@@ -210,11 +244,13 @@ Categorization Summary:
 **Example output:**
 ```
 Categorization Summary:
-- New files (will auto-copy): 12
+- New files (will auto-copy): 15
   .github/prompts/work-ticket.prompt.md
   .github/agents/new-agent.md
   .github/workflows/new-workflow.yml
-  ... and 9 more
+  CLAUDE.md
+  .claude/commands/work-ticket.md
+  ... and 10 more
 
 - Existing files (conflicts): 6
   .github/prompts/plan-ticket.prompt.md
@@ -230,9 +266,9 @@ Categorization Summary:
 
 For each file in `autoCopyFiles`:
 
-1. Read file content from `<TEMP_CLONE_PATH>/.github/<filePath>`
-2. Determine target path: `<BASE_REPO_ROOT>/.github/<filePath>`
-3. Create parent directories as needed using MCP file operations
+1. Read file content from `<TEMP_CLONE_PATH>/<filePath>`
+2. Determine target path: `<BASE_REPO_ROOT>/<filePath>`
+3. Create parent directories as needed using MCP file operations (e.g., `.claude/commands/` for Claude Code command files)
 4. Write file to target path with identical content
 5. Record success in manifest
 
@@ -252,6 +288,8 @@ Auto-Copy Results:
 Copied files:
 - .github/prompts/work-ticket.prompt.md ✓
 - .github/agents/new-agent.md ✓
+- CLAUDE.md ✓
+- .claude/commands/work-ticket.md ✓
 - ... and <REMAINING> more
 
 <If errors>
@@ -328,8 +366,8 @@ Enter your choice (1, 2, or 3):
 
 For each file in `conflictFiles`:
 
-1. Read file content from template: `<TEMP_CLONE_PATH>/.github/<filePath>`
-2. Write to base repo: `<BASE_REPO_ROOT>/.github/<filePath>` (overwrite)
+1. Read file content from template: `<TEMP_CLONE_PATH>/<filePath>`
+2. Write to base repo: `<BASE_REPO_ROOT>/<filePath>` (overwrite)
 3. Record action in manifest
 
 **MCP Tool Usage:**
@@ -488,7 +526,7 @@ Sync Operation Summary:
 
 Next steps:
 1. Review changes in your base repo: git diff
-2. Stage changes: git add .github/
+2. Stage changes: git add .github/ CLAUDE.md .claude/
 3. Commit changes: git commit -m "chore: sync agent-templates"
 4. Push to remote: git push
 ```
