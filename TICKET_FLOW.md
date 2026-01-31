@@ -15,6 +15,15 @@ This guide describes the complete workflow for working a GitHub Issue or Jira ti
 find-next-ticket → plan-ticket → analyze-ticket → Human Review → work-ticket → review-ticket-work → cut-pr → Human Review → review-pr → ✅ Done
 ```
 
+### Automated Workflow Execution
+
+For **automated orchestration** of this entire workflow with quality gates and human checkpoints, use the **Orchestrator Agent**:
+
+- **Prompt:** [.github/prompts/orchestrate-ticket.prompt.md](.github/prompts/orchestrate-ticket.prompt.md)
+- **Agent:** [.github/agents/ticket-orchestrator.agent.md](.github/agents/ticket-orchestrator.agent.md)
+
+The orchestrator automates all phases, enforces quality gates, and pauses at human review checkpoints (post-plan and post-PR). See [README.md](./README.md#orchestrator-agent) for getting started.
+
 ---
 
 ## Table of Contents
