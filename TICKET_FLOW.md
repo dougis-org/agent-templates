@@ -565,10 +565,12 @@ graph TD
         K{Plan<br/>valid?}
         L["🔧 Request<br/>Updates"]
         M["⚠️ Acknowledge<br/>Issues"]
+        J3["👤 Human Review<br/>Plan approval"]
         J --> K
         K -->|CRITICAL| L
         K -->|Gaps| M
         K -->|Good| M
+        M --> J3
     end
     
     subgraph Phase4["Phase 4: Implementation TDD"]
@@ -588,11 +590,13 @@ graph TD
         R["🎯 Cut PR<br/>Create PR"]
         S{Pre-flight<br/>checks<br/>pass?}
         T["⚠️ Fix Issues<br/>Push & Retry"]
+        S5["👤 Human Review<br/>PR approval"]
         Q --> R
         R --> S
         S -->|No| T
-        S -->|Yes| S1["→ Next Phase"]
+        S -->|Yes| S5
         T --> T1["↻ Retry"]
+        S5 --> S1["→ Next Phase"]
     end
     
     subgraph Phase6["Phase 6: Code Review & Merge"]
@@ -610,9 +614,10 @@ graph TD
     I --> J
     M --> N
     O1 --> Q
-    S1 --> U
+    S5 --> U
     W --> N
     L --> D
+    J3 --> N
     
     style A fill:#4CAF50,color:#fff
     style X fill:#4CAF50,color:#fff
