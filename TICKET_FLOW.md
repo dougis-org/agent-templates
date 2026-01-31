@@ -1,7 +1,7 @@
 # Ticket Flow: End-to-End Workflow Guide
 
 **Version:** 1.0  
-**Last Updated:** January 26, 2026  
+**Last Updated:** January 30, 2026  
 **Scope:** GitHub Issues & Jira Tickets
 
 ---
@@ -12,7 +12,7 @@ This guide describes the complete workflow for working a GitHub Issue or Jira ti
 
 **Quick Reference:**
 ```
-find-next-ticket → plan-ticket → analyze-ticket → work-ticket → review-ticket-work → cut-pr → review-pr → ✅ Done
+find-next-ticket → plan-ticket → analyze-ticket → Human Review → work-ticket → review-ticket-work → cut-pr → Human Review → review-pr → ✅ Done
 ```
 
 ---
@@ -27,10 +27,12 @@ find-next-ticket → plan-ticket → analyze-ticket → work-ticket → review-t
    - [Critical: Decomposition Check](#critical-decomposition-check)
 4. [Phase 3: Analysis & Understanding](#phase-3-analysis--understanding)
    - [Step 3.1: Analyze Ticket](#step-31-analyze-ticket)
+   - [Step 3.2: Human Review (Plan)](#step-32-human-review-plan)
    - [Step 4.1: Work Ticket](#step-41-work-ticket)
 5. [Phase 5: Review & Submission](#phase-5-review--submission)
    - [Step 5.1: Review Ticket Work](#step-51-review-ticket-work-optional)
    - [Step 5.2: Cut PR](#step-52-cut-pr)
+   - [Step 5.3: Human Review (PR)](#step-53-human-review-pr)
    - [Step 6.1: Review Pull Request](#step-61-review-pull-request)
 6. [Complete Workflow Diagram](#complete-workflow-diagram)
 7. [Scenario-Based Flows](#scenario-based-flows)
@@ -226,7 +228,47 @@ Analysis Report (Markdown):
 - Are all dependencies clear?
 
 **Next Step:**
+→ **Step 3.2: Human Review (Plan)** (confirm before implementation)
+
+---
+
+### Step 3.2: Human Review (Plan)
+**Type:** Manual Review  
+**Purpose:** Human validation of the ticket plan before implementation begins
+
+**What it does:**
+- Technical Lead or designated reviewer validates plan completeness
+- Confirms decomposition recommendation (split or keep as-is)
+- Validates acceptance criteria alignment with ticket intent
+- Checks for missing edge cases or risks
+- Approves or requests plan revisions
+
+**Input:**
+```
+Ticket Identifier: {{TICKET_ID}}
+Plan File: docs/plan/tickets/{{TICKET_ID}}-plan.md (for review)
+Analysis Report: (from Step 3.1)
+```
+
+**Review Checklist:**
+- [ ] All acceptance criteria are clear and testable
+- [ ] Decomposition recommendation is sound (split or keep as-is)
+- [ ] Implementation phases are reasonable
+- [ ] Test strategy aligns with requirements
+- [ ] No critical blockers or risks identified
+- [ ] Plan is realistic and achievable
+
+**Decision:**
+- ✅ Plan approved → **Step 4.1: Work Ticket** (proceed with implementation)
+- 🔄 Plan needs revisions → Return to **Step 2.1: Plan Ticket** (update and re-review)
+- ❓ Questions/Clarifications → Discuss with ticket author; update plan as needed
+
+**Expected Timeline:** Same day or within 24 hours
+
+**Next Step:**
 → **Step 4.1: Work Ticket** (implement the plan)
+
+---
 
 ### Step 4.1: Work Ticket
 **Mode:** `work-ticket`  
@@ -389,7 +431,46 @@ Status: Open (ready for review)
 - On default branch → Create feature branch first
 
 **Next Step:**
-→ **Step 6.1: Review PR** (external review) OR Done (if auto-merge enabled)
+→ **Step 5.3: Human Review (PR)** (confirm readiness for code review)
+
+---
+
+### Step 5.3: Human Review (PR)
+**Type:** Manual Review  
+**Purpose:** Human validation that PR is ready for detailed code review
+
+**What it does:**
+- Technical Lead or designated reviewer validates PR completeness
+- Confirms all acceptance criteria have been implemented
+- Validates code follows project conventions and quality standards
+- Checks that tests are comprehensive and passing
+- Approves or requests changes before code review
+
+**Input:**
+```
+Ticket Identifier: {{TICKET_ID}}
+Pull Request: {{PR_URL}} (from Step 5.2)
+Implementation Summary: (code changes overview)
+```
+
+**Review Checklist:**
+- [ ] All acceptance criteria are implemented
+- [ ] Tests are comprehensive (unit, integration, edge cases)
+- [ ] Code quality meets project standards
+- [ ] No obvious bugs or logic errors
+- [ ] Documentation is clear and complete
+- [ ] PR description and commits are clear
+- [ ] All CI checks are passing
+
+**Decision:**
+- ✅ PR ready for code review → **Step 6.1: Review PR** (detailed code review)
+- 🔄 Issues found → Return to **Step 4.1: Work Ticket** (fix and update PR)
+- ⏸️ On-hold → Request resolution of blocker; return when ready
+
+**Expected Timeline:** Same day or within 24 hours
+
+**Next Step:**
+→ **Step 6.1: Review PR** (detailed code review) OR Done (if auto-merge enabled)
 
 ---
 
