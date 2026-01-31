@@ -677,11 +677,11 @@ Workflow reaches DONE phase when:
 
 ## References
 
-- **Workflow:** [TICKET_FLOW.md](./TICKET_FLOW.md)
-- **State Management:** [.github/agents/includes/orchestrator-state-management.md](.github/agents/includes/orchestrator-state-management.md)
-- **Checkpoint Protocol:** [.github/agents/includes/human-checkpoint-protocol.md](.github/agents/includes/human-checkpoint-protocol.md)
-- **Plan Schema:** [.github/prompts/includes/plan-file-structure.schema.json](.github/prompts/includes/plan-file-structure.schema.json)
-- **Ticket Detection:** [.github/prompts/includes/ticket-detection.md](.github/prompts/includes/ticket-detection.md)
-- **Test Suite:** [.github/prompts/__tests__/orchestrate-ticket.test.md](.github/prompts/__tests__/orchestrate-ticket.test.md)
-- **Test Data:** [.github/prompts/test-data/orchestrator-scenarios.json](.github/prompts/test-data/orchestrator-scenarios.json)
+- **Workflow:** [TICKET_FLOW.md](../../TICKET_FLOW.md)
+- **State Management:** [orchestrator-state-management.md](../agents/includes/orchestrator-state-management.md)
+- **Checkpoint Protocol:** [human-checkpoint-protocol.md](../agents/includes/human-checkpoint-protocol.md)
+- **Plan Schema:** [plan-file-structure.schema.json](./includes/plan-file-structure.schema.json)
+- **Ticket Detection:** [ticket-detection.md](./includes/ticket-detection.md)
+- **Test Suite:** [orchestrate-ticket.test.md](./__tests__/orchestrate-ticket.test.md)
+- **Test Data:** [orchestrator-scenarios.json](./test-data/orchestrator-scenarios.json)
 

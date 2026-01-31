@@ -137,7 +137,9 @@ When advancing to next phase:
 When user rejects at checkpoint:
 
 1. **Extract user feedback**
-2. **Route to appropriate sub-agent** (see human-checkpoint-protocol.md)
+2. **Route to appropriate sub-agent** (see human-checkpoint-protocol.md for full routing logic):
+   - **PLAN_CHECKPOINT rejections** may route to: `plan-ticket`, `analyze-ticket` (based on feedback keywords)
+   - **PR_CHECKPOINT rejections** may route to: `work-ticket`, `cut-pr`, `review-pr` (based on feedback keywords)
 3. **Update phase history**:
    ```json
    {
@@ -147,9 +149,12 @@ When user rejects at checkpoint:
    }
    ```
 
-4. **Reset retry count** for rerouted phase:
-   - If rejecting PLAN_CHECKPOINT → route to PLANNING
-   - If rejecting PR_CHECKPOINT → route to IMPLEMENTATION
+4. **Reset to appropriate phase** for rerouted sub-agent:
+   - Feedback on scope/requirements → PLANNING phase
+   - Feedback on risks/mitigations → ANALYSIS phase
+   - Feedback on code/tests → IMPLEMENTATION phase
+   - Feedback on PR format → PR_CREATION phase
+   - (See human-checkpoint-protocol.md Feedback Routing section for complete routing table)
 
 5. **Update state**:
    ```json

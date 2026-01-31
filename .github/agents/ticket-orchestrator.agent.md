@@ -171,9 +171,9 @@ Full workflow phases (per TICKET_FLOW.md, enforced by orchestrator):
 ## Reference Documents
 
 - **Workflow:** [TICKET_FLOW.md](../../TICKET_FLOW.md)
-- **State Management:** [.github/agents/includes/orchestrator-state-management.md](./.github/agents/includes/orchestrator-state-management.md)
-- **Checkpoint Protocol:** [.github/agents/includes/human-checkpoint-protocol.md](./.github/agents/includes/human-checkpoint-protocol.md)
-- **Prompt:** [.github/prompts/orchestrate-ticket.prompt.md](./prompts/orchestrate-ticket.prompt.md)
-- **Tests:** [.github/prompts/__tests__/orchestrate-ticket.test.md](./prompts/__tests__/orchestrate-ticket.test.md)
-- **Test Data:** [.github/prompts/test-data/orchestrator-scenarios.json](./prompts/test-data/orchestrator-scenarios.json)
+- **State Management:** [orchestrator-state-management.md](./includes/orchestrator-state-management.md)
+- **Checkpoint Protocol:** [human-checkpoint-protocol.md](./includes/human-checkpoint-protocol.md)
+- **Prompt:** [orchestrate-ticket.prompt.md](../prompts/orchestrate-ticket.prompt.md)
+- **Tests:** [orchestrate-ticket.test.md](../prompts/__tests__/orchestrate-ticket.test.md)
+- **Test Data:** [orchestrator-scenarios.json](../prompts/test-data/orchestrator-scenarios.json)
 
