@@ -11,8 +11,25 @@
 This guide describes the complete workflow for working a GitHub Issue or Jira ticket from discovery through resolution, using the agent-templates system.
 
 **Quick Reference:**
-```
-find-next-ticket → plan-ticket → analyze-ticket → Human Review → work-ticket → review-ticket-work → cut-pr → Human Review → review-pr → ✅ Done
+
+```mermaid
+flowchart LR
+  A["🔍 find-next-ticket"] --> B["📋 plan-ticket"]
+  B --> C["✅ analyze-ticket"]
+  C --> D["👤 Human Review<br/>Plan"]
+  D --> E["💻 work-ticket"]
+  E --> F["👀 review-ticket-work"]
+  F --> G["🎯 cut-pr"]
+  G --> H["👤 Human Review<br/>PR"]
+  H --> I["📝 review-pr"]
+  I --> J["✅ Done<br/>Merge PR"]
+  
+  style A fill:#4CAF50,color:#fff
+  style J fill:#4CAF50,color:#fff
+  style D fill:#3F51B5,color:#fff
+  style H fill:#3F51B5,color:#fff
+  style E fill:#FF9800,color:#fff
+
 ```
 
 ### Automated Workflow Execution
@@ -72,23 +89,27 @@ The orchestrator automates all phases, enforces quality gates, and pauses at hum
 ## Phase 1: Discovery & Selection
 
 ### Step 1.1: Find Next Ticket
+
 **Mode:** `find-next-ticket`  
 **Type:** Agent (read-only)  
 **Purpose:** Identify the single next executable issue
 
 **What it does:**
+
 - Scans GitHub issues by dependency ordering
 - Prioritizes by milestone, then priority labels, then issue number
 - Respects blocking dependencies (blocked-by links)
 - Returns ONLY a single issue number
 
 **Input:**
+
 ```
 find-next-ticket mode is active
 No inputs required (optional: ask for assignee preference)
 ```
 
 **Output:**
+
 ```
 #<issue-number>
 ```
@@ -98,6 +119,7 @@ No inputs required (optional: ask for assignee preference)
 
 **Scenario: No Issue Found**
 If no executable issue exists, `find-next-ticket` returns a blocker explanation:
+
 - Lists earliest blocked issue
 - Shows its blockers and statuses
 - Indicates what needs to complete first
@@ -109,11 +131,13 @@ If no executable issue exists, `find-next-ticket` returns a blocker explanation:
 ## Phase 2: Planning
 
 ### Step 2.1: Plan Ticket
+
 **Mode:** `plan-ticket`  
 **Type:** Agent (writes plan file)  
 **Purpose:** Create an execution-ready implementation plan using TDD
 
 **What it does:**
+
 - Fetches ticket details (GitHub or Jira)
 - Creates/updates `docs/plan/tickets/{{TICKET_ID}}-plan.md` with:
   1. Problem statement
@@ -129,6 +153,7 @@ If no executable issue exists, `find-next-ticket` returns a blocker explanation:
   11. Rollout & observability plan
 
 **Input:**
+
 ```
 Ticket Identifier: {{TICKET_ID}} (required)
 Additional Links: {{OPTIONAL_REFS}} (optional)
@@ -136,6 +161,7 @@ Target Date/Milestone: {{TARGET_DATE}} (optional)
 ```
 
 **Output:**
+
 ```
 Plan file: docs/plan/tickets/{{TICKET_ID}}-plan.md
   - 11 required sections
@@ -146,6 +172,7 @@ Plan file: docs/plan/tickets/{{TICKET_ID}}-plan.md
 ```
 
 **Key Responsibilities (Plan):**
+
 - Creates or updates plan on disk
 - Searches codebase for reusable patterns
 - **Evaluates decomposition needs** (see critical check below)
@@ -158,6 +185,7 @@ Plan file: docs/plan/tickets/{{TICKET_ID}}-plan.md
 Before finalizing the plan, **ALWAYS evaluate decomposition**:
 
 **When to decompose (split into sub-issues):**
+
 - ✅ Work spans >3-5 days of effort
 - ✅ Multiple separable functional capabilities
 - ✅ Cross-layer changes (API + data + infrastructure)
@@ -174,6 +202,7 @@ Before finalizing the plan, **ALWAYS evaluate decomposition**:
 | 3 | ... | Feature | ... | ... | #1, #2 | S/M/L |
 
 **Action if decomposition recommended:**
+
 1. Document in plan file (Section 6)
 2. Inform user: "Recommend splitting into 3 slices"
 3. **Wait for user approval** before creating sub-issues
@@ -181,6 +210,7 @@ Before finalizing the plan, **ALWAYS evaluate decomposition**:
 5. If rejected: Proceed with single ticket
 
 **When to keep as single ticket:**
+
 - ✅ <3 days effort
 - ✅ Single functional capability
 - ✅ Single-layer change
@@ -191,6 +221,7 @@ Before finalizing the plan, **ALWAYS evaluate decomposition**:
 → **Step 3.1: Analyze Ticket** (validate plan)
 
 **Plan Validation Checklist:**
+
 - [ ] All acceptance criteria documented
 - [ ] Decomposition evaluated (split or keep as-is)
 - [ ] Test strategy matches TDD approach
@@ -204,11 +235,13 @@ Before finalizing the plan, **ALWAYS evaluate decomposition**:
 ## Phase 3: Analysis & Understanding
 
 ### Step 3.1: Analyze Ticket
+
 **Mode:** `analyze-ticket`  
 **Type:** Prompt  
 **Purpose:** Validate the ticket plan and identify gaps
 
 **What it does:**
+
 - Loads ticket details (GitHub or Jira)
 - Fetches or creates the plan file (`docs/plan/tickets/{{TICKET_ID}}-plan.md`)
 - Validates plan completeness:
@@ -218,6 +251,7 @@ Before finalizing the plan, **ALWAYS evaluate decomposition**:
 - Identifies issues: blockers, ambiguities, risks
 
 **Input:**
+
 ```
 Ticket Identifier: {{TICKET_ID}}
   (GitHub: numeric #123)
@@ -225,6 +259,7 @@ Ticket Identifier: {{TICKET_ID}}
 ```
 
 **Output:**
+
 ```
 Analysis Report (Markdown):
 - AC Coverage: [table of acceptance criteria]
@@ -236,12 +271,14 @@ Analysis Report (Markdown):
 ```
 
 **Decision Point:**
+
 - ✅ Plan is complete and valid → **Step 4.1: Work Ticket**
 - 🔴 Plan has CRITICAL issues → Request plan updates or re-plan
 - 🟡 Plan has gaps → Author can update plan or proceed with caveats
 - 💡 Decomposition review → Confirm recommendation (split or keep as-is)
 
 **Key Questions to Answer:**
+
 - Is the plan missing any acceptance criteria?
 - Are there edge cases not covered?
 - Is the decomposition recommendation sound?
@@ -253,10 +290,12 @@ Analysis Report (Markdown):
 ---
 
 ### Step 3.2: Human Review (Plan)
+
 **Type:** Manual Review  
 **Purpose:** Human validation of the ticket plan before implementation begins
 
 **What it does:**
+
 - Technical Lead or designated reviewer validates plan completeness
 - Confirms decomposition recommendation (split or keep as-is)
 - Validates acceptance criteria alignment with ticket intent
@@ -264,6 +303,7 @@ Analysis Report (Markdown):
 - Approves or requests plan revisions
 
 **Input:**
+
 ```
 Ticket Identifier: {{TICKET_ID}}
 Plan File: docs/plan/tickets/{{TICKET_ID}}-plan.md (for review)
@@ -271,6 +311,7 @@ Analysis Report: (from Step 3.1)
 ```
 
 **Review Checklist:**
+
 - [ ] All acceptance criteria are clear and testable
 - [ ] Decomposition recommendation is sound (split or keep as-is)
 - [ ] Implementation phases are reasonable
@@ -279,6 +320,7 @@ Analysis Report: (from Step 3.1)
 - [ ] Plan is realistic and achievable
 
 **Decision:**
+
 - ✅ Plan approved → **Step 4.1: Work Ticket** (proceed with implementation)
 - 🔄 Plan needs revisions → Return to **Step 2.1: Plan Ticket** (update and re-review)
 - ❓ Questions/Clarifications → Discuss with ticket author; update plan as needed
@@ -291,11 +333,13 @@ Analysis Report: (from Step 3.1)
 ---
 
 ### Step 4.1: Work Ticket
+
 **Mode:** `work-ticket`  
 **Type:** Agent (writes production code)  
 **Purpose:** Execute the plan with strict TDD and quality gates
 
 **What it does:**
+
 - Loads plan from disk (`docs/plan/tickets/{{TICKET_ID}}-plan.md`)
 - Follows TDD cycle:
   1. **RED:** Write meaningful tests first (unit, integration, contract)
@@ -310,12 +354,14 @@ Analysis Report: (from Step 3.1)
 - Updates GitHub/Jira issue status as work progresses
 
 **Input:**
+
 ```
 Ticket Identifier: {{TICKET_ID}} (required)
 Plan File Path: docs/plan/tickets/{{TICKET_ID}}-plan.md (auto-detected)
 ```
 
 **Output:**
+
 ```
 ✅ All tests pass
 ✅ All linters pass
@@ -347,6 +393,7 @@ Coverage: [percentage]
 | 5 | Quality Gates | All checks pass |
 
 **Quality Gates (Phase 5):**
+
 - ✅ Build succeeds
 - ✅ Unit tests pass
 - ✅ Integration tests pass
@@ -360,6 +407,7 @@ Coverage: [percentage]
 - ✅ Complexity checks pass
 
 **When to Stop & Review:**
+
 - Test failure → Fix root cause, don't dilute tests
 - Quality gate failure → Remediate before continuing
 - Scope creep → Pause and discuss with user
@@ -373,11 +421,13 @@ Coverage: [percentage]
 ## Phase 5: Review & Submission
 
 ### Step 5.1: Review Ticket Work (Optional)
+
 **Mode:** `review-ticket-work`  
 **Type:** Prompt  
 **Purpose:** Self-review local changes before pushing
 
 **What it does:**
+
 - Loads ticket from GitHub/Jira
 - Fetches current local changes
 - Validates each acceptance criterion against implementation
@@ -385,11 +435,13 @@ Coverage: [percentage]
 - Confirms all quality gates met
 
 **Input:**
+
 ```
 Ticket Identifier: {{TICKET_ID}} (required)
 ```
 
 **Output:**
+
 ```
 Review Report (Markdown):
 - AC Coverage: [table mapping ACs to code]
@@ -399,21 +451,25 @@ Review Report (Markdown):
 ```
 
 **Decision:**
+
 - ✅ All checks pass → **Step 5.2: Cut PR**
 - 🔴 Issues found → Fix and re-review
 - 💡 Improvements suggested → Apply and re-review
 
 **When to Skip:**
+
 - If confident in work quality
 - If CI/CD will catch issues (not recommended)
 - If proceeding to PR review is acceptable
 
 ### Step 5.2: Cut PR
+
 **Mode:** `cut-pr` (Prompt)  
 **Type:** Prompt  
 **Purpose:** Create a pull request from current branch
 
 **What it does:**
+
 - Validates branch is clean and up-to-date
 - Auto-detects ticket ID from branch name (if present)
 - Generates semantic PR title: `<type>(<scope>): #<TICKET_ID> <summary>`
@@ -422,6 +478,7 @@ Review Report (Markdown):
 - Links to GitHub issue automatically
 
 **Input:**
+
 ```
 Current Branch: (auto-detected)
 Ticket ID: (auto-detected from branch name or provided)
@@ -429,6 +486,7 @@ Additional Comments: {{OPTIONAL}} (for PR notes)
 ```
 
 **Output:**
+
 ```
 ✅ PR Created
 PR URL: https://github.com/owner/repo/pull/123
@@ -437,6 +495,7 @@ Status: Open (ready for review)
 ```
 
 **Pre-flight Checks (Phase 0):**
+
 - ✅ No uncommitted changes
 - ✅ All commits pushed to remote
 - ✅ Branch is up to date with default branch
@@ -444,6 +503,7 @@ Status: Open (ready for review)
 - ✅ Branch ≠ default branch
 
 **If Pre-flight Checks Fail:**
+
 - Uncommitted changes → Commit and push first
 - Unpushed commits → Push changes
 - Branch behind default → Pull latest
@@ -456,10 +516,12 @@ Status: Open (ready for review)
 ---
 
 ### Step 5.3: Human Review (PR)
+
 **Type:** Manual Review  
 **Purpose:** Human validation that PR is ready for detailed code review
 
 **What it does:**
+
 - Technical Lead or designated reviewer validates PR completeness
 - Confirms all acceptance criteria have been implemented
 - Validates code follows project conventions and quality standards
@@ -467,6 +529,7 @@ Status: Open (ready for review)
 - Approves or requests changes before code review
 
 **Input:**
+
 ```
 Ticket Identifier: {{TICKET_ID}}
 Pull Request: {{PR_URL}} (from Step 5.2)
@@ -474,6 +537,7 @@ Implementation Summary: (code changes overview)
 ```
 
 **Review Checklist:**
+
 - [ ] All acceptance criteria are implemented
 - [ ] Tests are comprehensive (unit, integration, edge cases)
 - [ ] Code quality meets project standards
@@ -483,6 +547,7 @@ Implementation Summary: (code changes overview)
 - [ ] All CI checks are passing
 
 **Decision:**
+
 - ✅ PR ready for code review → **Step 6.1: Review PR** (detailed code review)
 - 🔄 Issues found → Return to **Step 4.1: Work Ticket** (fix and update PR)
 - ⏸️ On-hold → Request resolution of blocker; return when ready
@@ -495,11 +560,13 @@ Implementation Summary: (code changes overview)
 ---
 
 ### Step 6.1: Review Pull Request
+
 **Mode:** `review-pr` (Prompt)  
 **Type:** Prompt  
 **Purpose:** Final review before merge (can be external reviewer or self-review)
 
 **What it does:**
+
 - Loads ticket from GitHub/Jira (for acceptance criteria)
 - Fetches PR details and code diff
 - Maps each AC to code changes
@@ -513,12 +580,14 @@ Implementation Summary: (code changes overview)
 - Reviews business logic clarity
 
 **Input:**
+
 ```
 Ticket Identifier: {{TICKET_ID}} (required)
 Pull Request: {{PR_URL_OR_OWNER/REPO#NUMBER}} (required)
 ```
 
 **Output:**
+
 ```
 Review Report (Markdown):
 - AC Coverage: [table of AC validation]
@@ -531,12 +600,14 @@ Review Report (Markdown):
 ```
 
 **Severity Levels:**
+
 - 🔴 **CRITICAL/Blocking:** Must resolve before merge
 - 🟡 **HIGH:** Should address; significant impact
 - 🟢 **MEDIUM:** Nice-to-have; improves quality
 - 💡 **LOW:** Highlights or documentation
 
 **Actions:**
+
 - ✅ All checks pass → Approve PR
 - 🔴 Critical issues → Request changes (block merge)
 - 🟡 High priority items → Comment (can merge with follow-up)
@@ -659,6 +730,7 @@ graph TD
 ## Scenario-Based Flows
 
 ### Scenario A: Happy Path (Start to Finish)
+
 ```
 1. find-next-ticket → returns #42
 2. plan-ticket #42 → creates plan file, no decomposition needed
@@ -673,6 +745,7 @@ graph TD
 **Time:** ~4-6 hours depending on complexity
 
 ### Scenario B: Decomposition Recommended
+
 ```
 1. find-next-ticket → returns #42
 2. plan-ticket #42 → "Recommend decomposing into 3 slices"
@@ -684,6 +757,7 @@ graph TD
 ```
 
 ### Scenario C: Blocking Dependencies
+
 ```
 1. find-next-ticket → no tickets executable
    Output: "#10 is blocked by #8 (in draft)"
@@ -692,6 +766,7 @@ graph TD
 ```
 
 ### Scenario D: Plan Revisions
+
 ```
 1. find-next-ticket → #42
 2. plan-ticket #42 → plan created
@@ -702,6 +777,7 @@ graph TD
 ```
 
 ### Scenario E: Quality Gate Failure
+
 ```
 1-4. work-ticket → Phase 5 quality gates fail
     - Duplication detected
@@ -712,6 +788,7 @@ graph TD
 ```
 
 ### Scenario F: Multiple Sub-Issues
+
 ```
 Same as Scenario B
 ```
@@ -721,30 +798,35 @@ Same as Scenario B
 ## Tips & Best Practices
 
 ### Before Starting a Ticket
+
 - ✅ Run `find-next-ticket` first (don't assume next ticket)
 - ✅ Read full ticket description in GitHub/Jira
 - ✅ Check if plan file exists (`docs/plan/tickets/{{TICKET_ID}}-plan.md`)
 - ✅ Understand all blockers and dependencies
 
 ### During Planning
+
 - ✅ Document assumptions explicitly
 - ✅ Search for reusable patterns (plan-ticket does this)
 - ✅ Ask clarifying questions early
 - ✅ Consider decomposition if >3-5 days work
 
 ### During Implementation
+
 - ✅ Write tests FIRST (RED phase)
 - ✅ Don't dilute tests to pass; fix code instead
 - ✅ Run quality gates frequently (not just end)
 - ✅ Commit often with clear messages
 
 ### Before Cutting PR
+
 - ✅ Run all tests locally
 - ✅ Run linters locally
 - ✅ Review your own code (run review-ticket-work)
 - ✅ Ensure plan file is complete (for tracking)
 
 ### For Code Review
+
 - ✅ Review from acceptance criteria perspective
 - ✅ Look for duplication vs. existing patterns
 - ✅ Check complexity (>20 line methods, >3 nesting)
@@ -767,6 +849,7 @@ Same as Scenario B
 ## Integration with CI/CD
 
 ### Local Workflow
+
 - `find-next-ticket` (read-only)
 - `analyze-ticket` (local planning)
 - `plan-ticket` (local file write)
@@ -775,6 +858,7 @@ Same as Scenario B
 - `cut-pr` (creates GitHub PR)
 
 ### CI/CD Validation (After PR Created)
+
 - GitHub Actions runs all tests
 - Codacy runs comprehensive analysis
 - Coverage reports generated
@@ -782,6 +866,7 @@ Same as Scenario B
 - Linting checks
 
 ### Merge Requirements
+
 - ✅ CI/CD checks pass
 - ✅ Code review approved
 - ✅ No conflicts with main
@@ -792,6 +877,7 @@ Same as Scenario B
 ## Summary
 
 This workflow provides:
+
 1. **Discovery:** Find next executable work
 2. **Understanding:** Validate scope and requirements
 3. **Planning:** Create TDD-based implementation plan
