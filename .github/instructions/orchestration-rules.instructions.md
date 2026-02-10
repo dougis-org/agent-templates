@@ -1,12 +1,12 @@
 ---
-applyTo: "orchestration/**"
+applyTo: ".github/**"
 description: "Global rules for the ticket orchestration system"
 ---
 
 # Orchestration Rules
 
 These rules govern the behavior of the ticket orchestration system.
-They apply to all orchestration agents and prompts under `orchestration/.github/`.
+They apply to all orchestration agents and prompts under `.github/`.
 
 ---
 
